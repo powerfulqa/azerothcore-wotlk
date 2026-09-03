@@ -72,7 +72,9 @@ otherwise be cluttered.
    tests **before** modifying anything.
 5. **Do not invent APIs, database fields, hooks, commands or core behaviour.** Verify
    them in the local source or official AzerothCore documentation first, and cite
-   `file.ext:line`.
+   `file.ext:line`. The official documentation is the AzerothCore wiki — cloned
+   locally and mapped in `REFERENCES.md`, which also sets out where the wiki is
+   authoritative and where this checkout overrides it.
 6. Production-quality, maintainable, narrow-scope code matching repository conventions.
 7. Explain important technical choices in plain English.
 8. Small, reviewable commits. No unrelated formatting changes, no drive-by refactors.
@@ -151,3 +153,4 @@ Do not duplicate these here — read them:
 | Decisions taken, and what is still open | `DECISION_LOG.md` |
 | Full foundation requirements | `requirements/project-foundation.REQUIREMENTS.md` |
 | AzerothCore build, C++, SQL, e2e, review rules | `../AGENTS.md` → `../.agents/docs/` |
+| Official AzerothCore documentation, and how much to trust it | `REFERENCES.md` |
