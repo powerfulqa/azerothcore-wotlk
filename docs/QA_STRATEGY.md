@@ -1,0 +1,126 @@
+# QA Strategy
+
+**Status:** Proposed — awaiting owner approval.
+**Last updated:** 2026-09-03
+**Principle:** "It compiles" is not evidence. Neither is "it should work."
+
+---
+
+## 1. The evidence rule
+
+**No build, test, migration or in-game check is reported as passing unless it was actually run and its
+output is shown.**
+
+This binds the agent without exception. If a check was skipped, that is stated explicitly. If a check
+failed, the failure and its output are reported — not summarised away, not deferred to "will fix". A phase
+is not complete because the work is done; it is complete when the verification is shown.
+
+---
+
+## 2. Test layers and ownership
+
+| Layer | Location | Owns | Runs |
+|---|---|---|---|
+| **Unit** | `src/test/` (GoogleTest) | Eligibility rules, tag matching, budget arithmetic, curve maths, config validation — anything pure | Every change |
+| **Live e2e** | `e2e/suites/` (Go, AzerothGhost harness) | Grant/removal, persistence across logout, prestige, both death paths, combat effects, multi-character interaction | Player-visible change |
+| **Scratch e2e** | `e2e/local/` (gitignored) | Debugging only. Never committed. Keepers are promoted to `e2e/suites/` | Ad hoc |
+| **SQL validation** | `pending_db_*/` against a scratch DB | Applies cleanly, is idempotent, rollback proven | Every migration |
+| **Manual in-game** | Owner | Feel, legibility, UX under a stock client | Player-facing change |
+| **Exploit / abuse** | Live e2e + review | One negative test per row of the anti-exploit register | Any system that could cause one |
+| **Performance** | Instrumented live run | Combat-path budget (T-7), telemetry growth (TM-3) | Any combat-path or high-volume change |
+| **Balance regression** | Telemetry queries | M-1…M-11 against the §2 bands of `BALANCE_FRAMEWORK.md` | Any tuning change |
+
+`[V]` The live-stack harness already exists: `e2e/README.md`, suites for combat, spells, quests, items,
+instances, guild, social and protocol, importing `github.com/azerothcore/AzerothGhost` v1.0.8. Offline
+`go test ./...` without `-tags=e2e` skips them.
+
+**Consequence worth stating plainly:** because this harness exists, "verified in game" can mean
+*automated and repeatable*, not merely "I logged in and it looked fine". That raises the achievable bar and
+we should use it.
+
+---
+
+## 3. Mandatory gates by change type
+
+| Change type | Unit | Live e2e | SQL validation | Manual | Exploit | Performance |
+|---|---|---|---|---|---|---|
+| Pure logic (rules, maths, parsing) | **required** | — | — | — | — | — |
+| Player-visible behaviour | if logic exists | **required** | — | **required** | if applicable | — |
+| New persistent table or column | — | **required** | **required** | — | — | if hot path |
+| Acquisition / grant path | **required** | **required** | if schema | **required** | **required** (X-8) | — |
+| Augment trigger system | **required** | **required** | — | **required** | **required** (X-3, X-4) | **required** (T-7) |
+| Combat-path hook | **required** | **required** | — | **required** | — | **required** (T-7) |
+| Tuning value change | — | — | — | — | — | balance regression |
+| Telemetry addition | — | **required** | **required** | — | — | **required** (TM-3) |
+
+A change type not listed defaults to the strictest comparable row.
+
+---
+
+## 4. Anti-exploit testing
+
+Every row of the anti-exploit register (`BALANCE_FRAMEWORK.md` §5) requires **at least one negative e2e
+test** — a test that asserts the exploit *cannot* happen — before the system that could cause it ships.
+
+Priority order, by architectural irreversibility rather than by likelihood:
+
+1. **X-4 recursive damage/healing loops** and **X-3 infinite resource loops** — the trigger-depth guard and
+   re-entrancy guard must exist in the augment system's *first commit*. Retrofitting these into a shipped
+   trigger system is how servers get duplication bugs.
+2. **X-8 reward duplication** — idempotency and transactionality tested at the grant path, not observed
+   after the fact.
+3. **X-9 reset abuse** and **X-10 trading/boosting** — tested at the life-end and persistence boundaries.
+4. **X-1 dead starting kits** — an automated viability sweep over every legal starting kit, not spot checks.
+5. **X-5, X-6, X-7** — uptime and count assertions.
+6. **X-2, X-11** — detected primarily by telemetry rather than by test.
+
+---
+
+## 5. Test data and environment
+
+- Accounts are created by the e2e harness (GM level 3). `[V]` Real player accounts are never reused —
+  `e2e/README.md`.
+- Scratch and debug tests live in `e2e/local/` (gitignored) and are **never** committed. Anything worth
+  keeping is promoted into `e2e/suites/` with proper metadata.
+- `[V]` A live stack requires authserver + worldserver + MySQL with `acore_auth`, `acore_characters` and
+  `acore_world`. Standing this up is a Phase 1 prerequisite alongside azerothMCP.
+
+---
+
+## 6. Migration and rollback
+
+Every schema change states, in its plan, before it is written:
+
+1. What it creates or alters.
+2. How it rolls back.
+3. What happens to existing accounts and lives — this project has **no reset valve**, so a migration that
+   cannot be reversed is a permanent decision (T-6).
+4. Which lifecycle events it must survive: life end, prestige, character deletion, account deletion.
+
+`[V]` Migrations land only in `data/sql/updates/pending_db_*/`. `base/`, `archive/` and merged `db_*/` are
+immutable (`AGENTS.md`).
+
+---
+
+## 7. Self-review
+
+Every phase ends with a hostile self-review before it is presented as complete, covering: regressions,
+exploits, security, performance, balance, missing tests, schema mistakes, and unclear player experience.
+Repository rules for this live in `.agents/docs/self-review-rules.md` and `.agents/docs/code-review.md`.
+
+The self-review report states what was verified **and what was not**. An unverified area named honestly is
+worth more than a claim of completeness.
+
+---
+
+## 8. Definition of done
+
+A change is done when all of the following are true and shown:
+
+- [ ] Mandatory gates for its change type (§3) have been run, with output.
+- [ ] Anti-exploit negative tests exist for any register row it could touch.
+- [ ] Telemetry exists for anything it will later be balanced on (Pillar 5).
+- [ ] Migration and rollback are stated and the rollback has been exercised.
+- [ ] Documentation and decision log are updated.
+- [ ] Self-review completed, including what was *not* verified.
+- [ ] Owner has reviewed the diff and confirmed in-game testing.
