@@ -18,6 +18,8 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0002 | Life-end model: voluntary prestige plus opt-in stakes | **Accepted** | 2026-09-03 |
 | 0003 | Adopt azerothMCP as a Phase-1 verification tool | Proposed | 2026-09-03 |
 | 0004 | Project documentation lives in `docs/` | Proposed | 2026-09-03 |
+| 0005 | Design documentation is published publicly on the fork | **Accepted** | 2026-09-04 |
+| 0006 | `CLAUDE.md` carries a project pointer (accepted upstream divergence) | **Accepted** | 2026-09-04 |
 
 ---
 
@@ -131,10 +133,64 @@ version-controlled. Design decisions need a durable, reviewable home.
 
 ---
 
+## ADR-0005 — Design documentation is published publicly on the fork
+
+**State:** Accepted (owner) · **Date:** 2026-09-04
+
+**Context.** The design documents needed a review venue so a third party could comment on
+them. Options considered: a private docs-only repository; a public fork of AzerothCore
+with a PR; a private full mirror of the repository.
+
+**Decision.** Fork `azerothcore/azerothcore-wotlk` to `powerfulqa/azerothcore-wotlk`
+(public — a fork of a public repository cannot be made private) and review via a PR
+against **the fork's own master**. Design docs and any future module code stay in one
+place, and pushing costs almost nothing because the history is shared.
+
+**Consequences.**
+- **Everything committed to the fork is public and permanent.** Anything that should not
+  be published needs a separate private repository, decided before it is committed.
+- `origin` remains upstream and is never pushed to. The fork is a second remote, `fork`.
+- `gh pr create` inside a fork defaults its base to the **parent** repository, so every
+  PR must pass `--repo powerfulqa/azerothcore-wotlk`. Without it, a PR would be opened
+  publicly against the AzerothCore project itself.
+- Identity exposure was reviewed and accepted: the owner's handle is public; his email
+  address is not, and does not appear in any commit (commits use the GitHub
+  `users.noreply.github.com` address).
+
+**Cost to reverse.** High for anything already pushed — publication is effectively
+permanent regardless of later deletion.
+
+---
+
+## ADR-0006 — `CLAUDE.md` carries a project pointer (accepted upstream divergence)
+
+**State:** Accepted (owner) · **Date:** 2026-09-04
+
+**Context.** A fresh engineer or agent loads `CLAUDE.md` → `AGENTS.md`, which is
+upstream AzerothCore's generic contributor guidance. Nothing in it referenced this
+project's documents or working method, so a new session had no route to `docs/` and
+would plausibly begin implementing without an approved plan.
+
+**Decision.** Add a short pointer section to `CLAUDE.md` directing the reader to
+`docs/WORKING_AGREEMENT.md`, `docs/README.md` and `docs/DECISION_LOG.md`.
+
+**Consequences.**
+- `CLAUDE.md` is an upstream-tracked file, so this is a **permanent, deliberate
+  divergence** that will conflict on every rebase touching that file. It is small and
+  trivially re-applied.
+- The rejected alternative was `CLAUDE.local.md` (gitignored, zero conflict), which was
+  declined because it does not survive a fresh clone — and surviving a fresh clone is the
+  entire point.
+- This is the project's first accepted core-tree divergence. Per rule 13 in the working
+  agreement, every further one needs its own ADR.
+
+**Cost to reverse.** Trivial — delete the section.
+
+---
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
-Full text: `.claude/plans/project-foundation/project-foundation.REQUIREMENTS.md` §14.
+Full text: `requirements/project-foundation.REQUIREMENTS.md` §14.
 
 | Q | Decision | Blocks | Cost to reverse |
 |---|---|---|---|

@@ -2,7 +2,7 @@
 
 **Status:** Proposed — awaiting owner approval. Nothing here is a final decision.
 **Last updated:** 2026-09-03
-**Source:** `.claude/plans/project-foundation/project-foundation.REQUIREMENTS.md` (v2)
+**Source:** `requirements/project-foundation.REQUIREMENTS.md` (v2)
 **Legend:** `[V]` verified in-repo · `[A]` assumption · `[P]` proposal · `[O]` open question
 
 ---
