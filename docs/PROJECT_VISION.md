@@ -63,8 +63,9 @@ none of the above is true. The Design Pillars exist specifically to make that fa
 
 ## 5. Scope boundaries
 
-- WoW 3.3.5a client, **unmodified**. No MPQ patch, no custom DBC, no required AddOn. Every player-facing
-  affordance must be expressible through stock gossip menus, spells, auras, items, action bars and tooltips.
+- WoW 3.3.5a client. No MPQ patch, no custom DBC. **ADR-0013 permits a required first-party AddOn**, so
+  player-facing affordances must be expressible through stock gossip menus, spells, auras, items, action
+  bars and tooltips, **or through that AddOn**.
 - **PvE only. PvP is permanently out of scope** and is not a balance dimension.
 - Level cap 60. `[V]` This is a configuration value (`MaxPlayerLevel`, range 1–255,
   `worldserver.conf.dist:2119-2125`), not a code change.
@@ -95,8 +96,9 @@ Metric plumbing is specified in `BALANCE_FRAMEWORK.md` §4 and is a Phase 3 prer
   independently designed. (Requirements NG-8.)
 - **Non-commercial.** No monetisation, no paid access, no donation-for-power, no commercial activity of any
   kind. (Requirements NG-9.)
-- **No Blizzard asset creation or redistribution.** The project operates against a client the operator
-  already owns; it produces no client files, game data, art, music or branding.
+- **No Blizzard asset creation.** The project authors no game art, music, text or branding, and the server
+  itself is a clean-room reimplementation. *The project's packaging and distribution stance is set by
+  ADR-0014, held in the private decision store (ADR-0005); this section deliberately does not restate it.*
 
 ## 8. Open questions affecting this document
 

@@ -68,7 +68,7 @@ judges. Each metric names the layer that must produce it.
 | # | Metric | Produced by |
 |---|---|---|
 | M-1 | First-life and repeat-life 1→60 time (wall-clock and played) | life record |
-| M-2 | Ability pick rates | acquisition ledger |
+| M-2 | Ability pick rates | acquisition ledger — must record **options offered and not taken**, or this measures availability, not preference (D-008) |
 | M-3 | Talent pick rates | acquisition ledger |
 | M-4 | Augment pick rates | acquisition ledger |
 | M-5 | Build distribution and extreme outliers | build snapshot at milestones |
@@ -112,6 +112,7 @@ one negative test** in `e2e/suites/` before the system that could cause it ships
 | X-9 | Reset abuse | Life-end and prestige rules; prestige eligibility constraints; M-7 monitoring |
 | X-10 | Trading, boosting and economy exploits | Persistent progression is account-scoped and non-tradeable; group-acquisition rules; M-9 monitoring |
 | X-11 | A single mandatory best build | Role coverage (P-5); outlier detection via M-2…M-5; pick-rate ceiling SM-4; a stated nerf policy |
+| X-12 | Draft rerolling by relog or session manipulation | Offers generated once and persisted transactionally with the acquisition point (D8-a); reroll spend recorded in the life row |
 
 **X-3 and X-4 are architectural, not incidental.** Trigger-depth guards must exist in the augment system's
 first commit. Retrofitting a re-entrancy guard into a shipped trigger system is how servers get duplication

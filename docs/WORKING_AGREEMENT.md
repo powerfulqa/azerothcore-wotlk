@@ -84,9 +84,10 @@ otherwise be cluttered.
     actually run and its result shown.**
 11. Call out uncertainty, assumptions, risks, missing information, exploits,
     performance impacts, compatibility concerns and data-migration risks early.
-12. Keep all work original and non-commercial. No Blizzard assets, client files, game
-    data, music, text or branding beyond what is legally appropriate for an
-    independently operated development environment.
+12. Keep all work original and non-commercial. No Blizzard assets, game data, music, text
+    or branding beyond what is legally appropriate for an independently operated
+    development environment. *Qualified by ADR-0014, which is held in the private decision
+    store (ADR-0005); consult it before any distribution or packaging work.*
 13. Prefer custom modules. Keep core patches to an absolute minimum and document every
     unavoidable divergence as an ADR.
 

@@ -86,8 +86,10 @@ designed until V-1 is measured (Phase 7).
 
 ### 5.1 Life start
 
-- The player selects a **chassis** (technical class, `[V]` required because `ChrClassesEntry.powerType`
-  binds resource type — `DBCStructure.h:656`). Visibility to the player is `[O]` Q6.
+- The **vessel** carries a **chassis** (technical class, `[V]` required because `ChrClassesEntry.powerType`
+  binds resource type — `DBCStructure.h:656`). Per D-007 the vessel persists across lives, so the chassis is
+  chosen at vessel creation, not at each life start, **unless prestige may change it** — `[O]` Q11.
+  Visibility to the player is `[O]` Q6.
 - The player receives a small **viable** starting kit (P-2). A dead starting kit is a defect (X-1).
 - The player may declare **optional stake modifiers** — hardcore, or challenge conditions — which are
   visible for the life's duration and **immutable once chosen** (P-12).
@@ -100,9 +102,15 @@ Levelling 1→60 through the classic world. Three power layers accumulate, and t
 
 | Layer | Nature | Acquired |
 |---|---|---|
-| **Abilities** | active tools | through levelling, model `[O]` Q2 |
-| **Talents** | passive modifiers, specialisation | through levelling, model `[O]` Q2 |
+| **Abilities** | active tools | through levelling, by guaranteed-offer draft (D-008) |
+| **Talents** | passive modifiers, specialisation | through levelling, by guaranteed-offer draft (D-008) |
 | **Augments** | build-warping interactions — resource, cooldown, trigger, area, scaling transformation, defensive conversion, risk/reward | level milestones, and potentially defined PvE achievements |
+
+**Cadence (D-009).** A life opens with a **wild card** ability or talent selection. Then **at every level**
+the player chooses one of three: a new ability, an **upgrade** to an ability they already hold, or a talent.
+The upgrade is a fourth axis — *depth* rather than a fourth power layer — and it competes for the same slot
+as breadth, which is where Pillar 2's real cost bites. Augments keep their own milestone rhythm and are not
+part of the per-level choice.
 
 Pacing: ≈6h for an informed ordinary player on a first life (P-8); progressively faster on later lives
 through unlocks, agency and synergy (P-10) — **not** primarily through an XP multiplier.
@@ -121,13 +129,18 @@ Two paths, per D-002:
 **Constraint D2-a:** no persistent unlock may be reachable *only* through a staked life. If it is, "optional"
 is a false description and the model collapses into mandatory hardcore.
 
-**Open and unanswered:** `[O]` **Q1 — is a life a character, or a character reset in place?** This is the
-next structural decision. It determines whether prestige retires/deletes the level-60 character and starts a
-fresh one, or resets the same character to level 1 — and with it the persistence anchor, character-slot
-pressure, and whether past lives remain viewable. **Sections 5.1 and 5.3 cannot be finalised until Q1 is
-answered.**
+**Settled by D-007 (2026-09-04).** A life is **not** a character. The character is a persistent **vessel**;
+prestige resets that vessel in place to level 1, and each life is recorded as a first-class row carrying its
+stake modifiers, timestamps, outcome and audit trail. Consequences that land in this section:
 
-Also open: `[O]` Q9 — whether disconnect and server-fault deaths are forgiven, appealed, or final in a
+- The 10-character client cap (`worldserver.conf.dist:2031-2036`) bounds **concurrent vessels**, not lives.
+  A player may run several vessels under different stakes.
+- Past lives remain queryable, so a "past lives" view is possible. Not committed to here.
+- `[O]` The chassis question this raises is Q11, flagged in §5.1 above.
+- The prestige reset itself is the project's highest-risk operation (D7-a) and needs an enumerated
+  table-by-table reset manifest before implementation. That is a `QA_STRATEGY.md` gate, not a loop concern.
+
+Still open in this section: `[O]` Q9 — whether disconnect and server-fault deaths are forgiven, appealed, or final in a
 staked life. Silence here is a player-trust failure.
 
 ---

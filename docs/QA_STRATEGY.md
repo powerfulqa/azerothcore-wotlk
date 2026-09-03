@@ -52,8 +52,34 @@ we should use it.
 | Combat-path hook | **required** | **required** | — | **required** | — | **required** (T-7) |
 | Tuning value change | — | — | — | — | — | balance regression |
 | Telemetry addition | — | **required** | **required** | — | — | **required** (TM-3) |
+| **Prestige reset path** | **required** | **required** | **required** | **required** | **required** (D7-a) | **required** |
+| **Client AddOn change** (ADR-0013) | — | **required** | — | **required** | — | if per-frame work |
 
 A change type not listed defaults to the strictest comparable row.
+
+**`[O]` The AddOn is a new test layer this document does not yet cover.** ADR-0013 (D13-c) adds a Lua
+codebase with its own release cycle, version-locked to the server. A stale AddOn misreporting resources is
+worse than no AddOn at all, so version negotiation and refusal-to-run-when-mismatched need explicit tests.
+This section needs expanding once the AddOn exists.
+
+### 3.1 The prestige reset manifest (D7-a)
+
+ADR-0007 makes prestige reset a live character vessel in place. It mutates a real row and its dependants,
+with no undo, and a table missed is a permanent corruption or exploit. `[V]` `data/sql/base/db_characters/`
+ships 108 table files, 35 named `character_*`, and 51 declaring a `guid int unsigned` column — not all of
+which mean *character* guid.
+
+**No prestige implementation may begin until a reset manifest exists** that classifies every relevant table
+as **cleared**, **preserved**, or **archived to the life record**, derived from the schema in this checkout
+and cited `file.sql:line` — not from memory. The manifest is reviewed as a document in its own right, and
+each classification needs a stated reason.
+
+Two properties must be tested explicitly, not assumed:
+
+- **Completeness** — after a reset, no run-scoped state survives on the vessel. Tested by populating every
+  table in the *cleared* set on a live vessel, prestiging, and asserting each is empty.
+- **Atomicity / resumability (D7-b)** — a reset interrupted part-way must leave the vessel in a state that is
+  unambiguously detectable and recoverable. A half-reset vessel is both corruption and an exploit vector.
 
 ---
 

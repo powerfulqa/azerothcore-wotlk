@@ -28,8 +28,10 @@ feature is defensible; the sum of them deletes the world.
 
 ## Pillar 2 — Build, don't pick
 
-Power is **constructed** from discovered parts under constraint. There is no class identity, no settled
-build, and no single correct answer.
+Power is **constructed** from discovered parts under constraint. There is no settled build and no single
+correct answer. **ADR-0011 briefly qualified this and was superseded by ADR-0012:** every chassis carries
+every resource, so the chassis does not bound the ability pool and the pillar stands unqualified. The
+chassis fixes only the displayed resource, base stats and armour animation.
 
 **Test:** *Is the player making a decision with a real cost, or collecting an item from a list?*
 
@@ -41,8 +43,11 @@ build, and no single correct answer.
 
 **Guards:** Requirements P-3, P-4, P-5, X-11. Metric: SM-4 pick-rate ceiling.
 
-**Note:** This pillar is why the acquisition model (`[O]` Q2) is the largest open design question. Get it
-wrong and every other system inherits the mistake.
+**Note:** This pillar is why the acquisition model was the largest open design question. It is settled by
+**ADR-0008** — a choice-of-N draft in which protected categories guarantee a role-critical function is
+*offered* rather than possessed. The "offered, not possessed" framing exists precisely to satisfy this
+pillar: a guarantee that handed the player the power would be a grant with no alternative forgone, which
+this pillar rejects.
 
 ---
 
@@ -77,9 +82,11 @@ their build works. Power the player cannot understand is churn, not depth.
 | Synergies discoverable from tooltips and observed behaviour | Synergies that require a spreadsheet or an external wiki |
 | Clear feedback when a trigger fires | Silent internal state the player must infer |
 
-**Guards:** Requirements P-6, P-7, H-5, T-10. This pillar is under constant pressure from the stock-client
-constraint (no custom UI), which makes it *harder* here than on a server with an AddOn — and therefore more
-important to defend explicitly.
+**Guards:** Requirements P-6, P-7, H-5, T-10. This pillar was under constant pressure from the stock-client
+constraint, which made it harder here than on a server with an AddOn. **ADR-0013 lifts that handicap:** the
+project now ships its own bundled AddOn, so custom UI is available. The pillar still binds — a rich UI makes
+it easier to *hide* complexity behind a readout rather than design it away — but it is no longer fighting the
+client.
 
 ---
 

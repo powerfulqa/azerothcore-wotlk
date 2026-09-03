@@ -37,19 +37,38 @@ next life wider and faster.
 | [QA_STRATEGY.md](QA_STRATEGY.md) | Evidence rule, test layers, mandatory gates by change type, definition of done |
 | [CONTENT_PIPELINE.md](CONTENT_PIPELINE.md) | How one ability / talent / augment goes from idea to live |
 | [DECISION_LOG.md](DECISION_LOG.md) | ADRs, plus open questions ranked by cost-to-reverse |
+| [REFERENCES.md](REFERENCES.md) | The AzerothCore wiki and other official sources — where they live, and how much weight each carries |
 | [requirements/project-foundation.REQUIREMENTS.md](requirements/project-foundation.REQUIREMENTS.md) | Full foundation requirements: goals, non-goals, acceptance criteria, risks, phase backlog |
 
 ## Status
 
 **Foundation documentation only.** No code, no schema, no module, and no build has been
-run. Every document is marked *Proposed* except the two accepted ADRs.
+run. Every design document is marked *Proposed* except the accepted ADRs.
 
-Two decisions are settled (ADR-0001 direction, ADR-0002 life-end model). Ten questions
-are open and deliberately unanswered rather than guessed at.
+Twelve decisions are settled (one superseded the same day):
 
-**Next action:** answer **Q1** — is a "life" a character, or a character reset in place?
-It has the highest cost to reverse of anything outstanding, and it blocks the Phase 2
-schema and finalising `CORE_GAME_LOOP.md` §5.
+| ADR | In one line |
+|---|---|
+| 0001 | A life is a level 1→60 run; classless build per life; account progression persists |
+| 0002 | Level 60 is a home, not a finish line — voluntary prestige plus opt-in stakes |
+| 0005 | Design docs are published publicly on the fork |
+| 0006 | `CLAUDE.md` carries a project pointer (first accepted upstream divergence) |
+| **0007** | The character is a persistent **vessel**, reset in place at prestige; each life is a first-class row |
+| **0008** | Acquisition is a choice-of-N draft; protected categories guarantee a function is *offered*, never forced; rerolls are earned |
+| **0009** | A wild card start, then at every level a choice of new ability, **upgrade**, or talent |
+| **0010** | Abilities and upgrades are curated client spells; talents and augments are original server-authored effects |
+| ~~0011~~ | *Superseded by 0012 the same day* |
+| **0012** | **Every chassis carries every resource** — mana, rage and energy at once, so any chassis may be offered any ability |
+| **0013** | A **bundled, required client AddOn** ships the stacked multi-resource frame — **amends T-10** |
+| 0014 | *Reserved — held in the private decision store (ADR-0005)* |
+
+Those answers raised ten further questions (Q11–Q20), one of which (Q18) was dissolved
+rather than answered. Fourteen remain open and are deliberately unanswered rather than
+guessed at.
+
+**Next action:** answer **Q21** — where the project's private repository lives and what
+belongs in it. ADR-0005 reserved one but never established it, and ADR-0014 now needs it.
+Then **Q11**.
 
 ## Conventions in these documents
 

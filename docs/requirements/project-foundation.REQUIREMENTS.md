@@ -90,7 +90,9 @@ Explicitly flagged so no plan treats them as established:
 - **V-1** Which level-60 raid and dungeon encounters exist in the 3.3.5a client, and at what tuning. The
   classic raids were re-tuned across expansions; their 3.3.5a state must be measured, not remembered.
   Blocks the endgame and solo-raid assessment.
-- **V-2** Cross-chassis spell behaviour: scaling, stance/form requirements, resource assumptions, pet and
+- **V-2** Cross-chassis spell behaviour. Server side partly verified by ADR-0010/0011; the client side and
+  the class→resource mapping remain unverified (no `data/dbc/` in this checkout). Scaling, stance/form
+  requirements, resource assumptions, pet and
   aura assumptions, and which spells silently no-op. Blocks the entire power catalogue (see R-2, Phase 1).
 - **V-3** Whether classic 1–60 quest and dungeon content in the 3.3.5a world DB supports a coherent
   solo levelling path at the intended pace without gaps.
@@ -146,7 +148,8 @@ ends; account-scoped progression persists and compounds across lives, favouring 
 - **NG-3** No build, configure or server run.
 - **NG-4** No final balance numbers, no ability/talent/augment catalogue.
 - **NG-5** No content authoring.
-- **NG-6** No client modification of any kind: no MPQ patch, no custom DBC, no required AddOn.
+- **NG-6** No modification of the game client binary or its data: no MPQ patch, no custom DBC.
+  *(Amended by ADR-0013: a required first-party AddOn is permitted and is not a client modification.)*
 - **NG-7** **No PvP scope**, at any point in the project. PvP balance is explicitly not a design dimension.
 - **NG-8** No third-party server's code, database, UI, assets, branding, terminology, exact mechanics,
   balance values, custom content, text or proprietary designs. Inspiration is limited to publicly-observable
@@ -160,13 +163,21 @@ ends; account-scoped progression persists and compounds across lives, favouring 
 ### 5.1 The life
 
 - **P-1 Chassis.** A character has an underlying technical class fixing resource type, armour animation and
-  base stat curve (§1.3). It is scaffolding. It must not lock the player into a role or class identity, and
-  must not be the primary thing a build is "about". Visibility to the player is **Q6**.
+  base stat curve (§1.3). **Settled by ADR-0012 (2026-09-04), which superseded ADR-0011:** every chassis
+  carries *every* resource, so the chassis does **not** restrict the ability pool — any chassis may be
+  offered any curated ability. It still fixes the **displayed** resource, the base stat curve and armour
+  animation, so it is not quite pure scaffolding, but it must not lock the player into a role or class
+  identity and must not be the primary thing a build is "about". Visibility to the player is **Q6**; the
+  displayed resource bar means it cannot be entirely hidden.
 - **P-2 Starting kit.** Every life begins with a small, *viable* combat kit — able to kill, survive and
   progress solo from level 1. A dead or unusable starting kit is a defect, not a bad roll (see X-1).
 - **P-3 Acquisition through levelling.** Curated cross-class **abilities** (active) and **talents**
-  (passive) are acquired as the player levels. The acquisition model — random roll, choice-of-three draft,
-  protected categories, rerolls, or a hybrid — is **Q2**, the largest open design question.
+  (passive) are acquired as the player levels. The acquisition model is settled by **ADR-0008**: a
+  choice-of-N draft (N starts at 3, tunable) in which protected categories guarantee a role-critical
+  function is *offered* — never forced — and an account-earned reroll budget is spent within the life.
+  **ADR-0009** sets its cadence: a wild card selection at life start, then at every level a choice between a
+  new ability, an **upgrade** to one already held, or a talent. The upgrade axis is depth, not a fourth
+  power layer, and it competes for the same slot as breadth.
 - **P-4 Eligibility and tags.** Every ability, talent and augment carries tags and eligibility rules so
   incompatible, useless or exploit-prone combinations cannot be offered. This is a *system requirement*,
   not per-item curation, because per-item curation does not scale.
@@ -227,8 +238,10 @@ ends; account-scoped progression persists and compounds across lives, favouring 
   every ability/talent/augment grant, every persistent-currency movement, and every life end.
 - **T-9 Idempotent grants.** Every acquisition path must be idempotent and transactional, or duplicate
   rewards become an exploit class (X-8).
-- **T-10 Stock-client expressibility.** Every player-facing affordance must trace to a stock-client
-  mechanism — gossip menu, spell, aura, item, action bar, chat, tooltip — at PLAN time, not ACT time.
+- **T-10 Client expressibility.** **Amended by ADR-0013 (2026-09-04).** Every player-facing affordance must
+  trace to a stock-client mechanism — gossip menu, spell, aura, item, action bar, chat, tooltip — **or to the
+  project's own bundled AddOn** — at PLAN time, not ACT time. A **required AddOn is now permitted**; MPQ
+  patches and custom DBC remain forbidden. See rule 12 for the packaging and distribution stance.
 
 ---
 
@@ -297,7 +310,7 @@ Every item the brief lists as unacceptable, with the layer that prevents it. Exp
 | # | Must not occur | Primary prevention |
 |---|---|---|
 | X-1 | Dead starting kits | P-2 as an acceptance criterion; automated viability check over every legal starting kit |
-| X-2 | Unusable ability rolls | P-4 eligibility rules + Q2's chosen acquisition model |
+| X-2 | Unusable ability rolls | P-4 eligibility rules + the D-008 draft: the player can decline any offered power |
 | X-3 | Infinite resource loops | Augment interaction rules; resource-generation caps; combat-log assertions |
 | X-4 | Recursive damage/healing loops | Trigger-depth limit and re-entrancy guard in the augment trigger system |
 | X-5 | Permanent invulnerability | Mitigation stacking caps; duration floors; explicit uptime assertions |
@@ -340,7 +353,7 @@ Ordered so that each phase is independently valuable, stoppable, and placed befo
 | 1 | **Cross-chassis spell spike** (V-2, R-2) | Narrow, empirical, on a live stack. It can *invalidate the entire power model*, so it must come before any catalogue design. Highest information-per-hour in the project. |
 | 2 | **Life lifecycle skeleton** | Life record, prestige, stake-modifier field, account-scoped persistence anchor. No powers. Establishes the schema everything else attaches to, while the schema is still cheap to change. |
 | 3 | **Telemetry substrate** (§7) | Must exist before any balance claim. Needs Phase 2 to have something to measure. |
-| 4 | **Classless acquisition MVP** (System A) | Abilities + talents under the Q2 model, one role proven end-to-end |
+| 4 | **Classless acquisition MVP** (System A) | Abilities + talents under the D-008 draft, one role proven end-to-end |
 | 5 | **Augment layer** (System B) | Depends on 4; needs the trigger-depth guards from X-3/X-4 designed in, not retrofitted |
 | 6 | **Levelling curve retune** | Needs 3 to measure against the 6-hour target |
 | 7 | **Endgame assessment** (V-1, P-15–P-18) | Needs a real build to assess encounters against |
@@ -420,16 +433,17 @@ run and its output shown. This binds me without exception.
 
 Ordered by how much each constrains everything downstream.
 
-- **Q1 (next)** — **Is a "life" a character, or a character reset in place?** Does prestige retire/delete
-  the level-60 character and start a fresh one, or reset the same character to level 1? This decides the
-  persistence anchor, character-slot pressure, what a player's history looks like, whether old lives remain
-  viewable, and a large part of the Phase 2 schema. It is the next structural fork.
-- **Q2** — **Acquisition model** for abilities and talents: random roll, choice-of-three draft, protected
-  categories, rerolls, or a hybrid? The brief requires a decision. This is the biggest *design* question and
-  defines the feel of every life.
-- **Q3** — **Where does power come from**: existing WoW spells granted cross-chassis, original
-  server-authored effects, or a mix? Determines whether this is primarily a curation effort or a C++ effects
-  effort, and sets Phase 1's scope. (Carried unanswered from v1.)
+- **Q1 — ANSWERED 2026-09-04 → ADR-0007.** A life is neither purely a character nor a bare reset: the
+  character is a persistent **vessel**, prestige resets it in place to level 1, and each life is a
+  first-class row carrying stake modifiers, timestamps, outcome and audit trail. Raised **Q11** and **Q12**.
+- **Q2 — ANSWERED 2026-09-04 → ADR-0008.** Choice-of-N draft with protected categories that guarantee a
+  role-critical function is *offered* rather than possessed, plus an account-earned, life-spent reroll
+  budget. N starts at 3 and is a tuning value; offers are stored as rows, never fixed columns. Raised
+  **Q13** and **Q14**.
+- **Q3 — ANSWERED 2026-09-04 → ADR-0010.** Split by layer: abilities and upgrades are existing client
+  spell IDs granted cross-chassis (they need spellbook presentation); talents and augments are original
+  server-authored effects (they modify abilities and need no tooltip). Verified that this needs **no core
+  patch** — module hooks plus world DB data suffice. Raised **Q17**.
 - **Q4** — **Module hosting**: separate repository under `modules/` (clean upstream history, standard AC
   practice) or vendored in-tree via `!modules/mod-<name>` (single repo, simpler solo)?
 - **Q5** — **Levelling path**: is the full classic 1–60 world open, or curated/gated to guarantee pacing and
@@ -443,6 +457,38 @@ Ordered by how much each constrains everything downstream.
 - **Q9** — **Disconnect/server-fault deaths in staked lives** (D2-c): forgiven, appealed, or final?
 - **Q10** — **Planning-doc location**: keep `.claude/plans/` per your instruction and amend `AGENTS.md`, or
   switch to `.agents/plans/` per the repo's existing convention? Both are gitignored.
+- **Q11** — **May prestige change the vessel's chassis?** Raised by ADR-0007. A persistent vessel fixes its
+  chassis for its entire existence unless prestige may reroll or re-choose it. If it cannot change, a player
+  wanting a different chassis needs a second vessel — which reintroduces slot pressure against the 10-slot
+  client cap. Bears directly on how classless the game feels *across* lives, not just within one.
+- **Q12** — **Vessel deletion vs life records** (D7-c). If life records back account-level unlocks, deleting a
+  vessel must not orphan or destroy them. Are life records reparented to the account, retained orphaned, or is
+  vessel deletion restricted?
+- **Q13** — **Protected-category taxonomy** (D8-d). Which role-functions are protected — healing, defensive,
+  AoE, mobility, sustain? — and by what level must each have been offered? Too few and dead builds return;
+  too many and every life converges on the same shape.
+- **Q14** — **Decline semantics.** May a player refuse a draft outright and bank nothing, and do unpicked
+  powers return to the pool later in the same life? Determines whether guarantees are one-shot, and changes
+  how every draft feels.
+- **Q15** — **Offer composition.** For both the wild card and the per-level choice: is the player shown one
+  option of each type (ability / upgrade / talent), or N options drawn from a combined pool? The first makes
+  every level a comparison across kinds; the second makes the kinds compete for slots.
+- **Q16** — **Upgrade semantics** (D9-a). Is an upgrade a rank advance on the same spell, or a swap to a
+  different, stronger spell? Is upgrade depth capped, and does a capped ability stop being offered?
+- **Q17 — ANSWERED 2026-09-04 → ADR-0011.** Chassis keep their native resource; abilities are curated to
+  match. Every tooltip stays true at zero engineering cost, but the chassis now carries real mechanical
+  identity — this **amends P-1** above, by owner decision and per the pillars' own escape clause. Raised
+  **Q18**.
+- **Q18 — DISSOLVED 2026-09-04 by ADR-0012.** The question presupposed ADR-0011's restriction. Since every
+  chassis now carries every resource, all ten are viable and the D11-e asymmetry is gone.
+- **Q19 — ANSWERED 2026-09-04 → ADR-0013.** All resources are shown at once, stacked in the player frame,
+  delivered by a **bundled, required first-party AddOn**. `[V]` Verified achievable in pure AddOn Lua with
+  stock APIs — no MPQ patch and no modified client. This **amends T-10** and raised **Q20**.
+- **Q20 — ANSWERED 2026-09-04 → ADR-0014**, which is held in the project's private decision store per
+  ADR-0005 rather than in this public record.
+- **Q21 (next)** — **The private repository.** ADR-0005 reserved one for material that should not be
+  published but never established it. It is now needed. Where does it live, what moves into it, and how do
+  the two records cross-reference without the public one disclosing the private one?
 
 ---
 

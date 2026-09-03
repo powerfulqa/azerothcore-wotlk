@@ -29,7 +29,7 @@ foundation time. Target client: WoW 3.3.5a, **unmodified**.
 | T-7 | **Combat-path performance budget.** Anything hooking `UnitScript::OnDamage`/`OnHeal` must have a bounded, *measured* per-call cost | These run at very high frequency; "it seemed fine" is not a measurement |
 | T-8 | **Observability from day one.** Structured logging, GM inspection commands, and an audit trail for every grant, every currency movement and every life end | Required for debugging *and* exploit investigation |
 | T-9 | **Idempotent grants.** Every acquisition path is idempotent and transactional | Otherwise duplicate rewards become an exploit class (X-8) |
-| T-10 | **Stock-client expressibility.** Every player-facing affordance traces to a stock mechanism — gossip, spell, aura, item, action bar, chat, tooltip — at PLAN time, not ACT time | No MPQ patch, no custom DBC, no required AddOn |
+| T-10 | **Client expressibility.** Every player-facing affordance traces to a stock mechanism — gossip, spell, aura, item, action bar, chat, tooltip — **or to the project's own bundled AddOn (ADR-0013)** — at PLAN time, not ACT time | No MPQ patch, no custom DBC. A required AddOn **is** permitted since ADR-0013 |
 
 ---
 
@@ -93,8 +93,15 @@ Flagged so no plan treats them as established.
 - **V-1** Which level-60 raid and dungeon encounters exist in the 3.3.5a client, and at what tuning. The
   classic raids were re-tuned across expansions; their 3.3.5a state must be *measured*. Blocks endgame and
   solo-raid assessment (Phase 7).
-- **V-2** Cross-chassis spell behaviour: scaling, stance/form requirements, resource assumptions, pet and
-  aura assumptions, and which spells silently no-op. **Blocks the entire power catalogue** — hence Phase 1.
+- **V-2** Cross-chassis spell behaviour. **Partially reduced on 2026-09-04** — see ADR-0010, which verified
+  the server-side mechanisms: the world DB overrides *and extends* the spell store
+  (`DBCDatabaseLoader.cpp:79`), `SpellInfo` is mutable by modules at load (`ScriptMgr.h:534`), and nothing
+  checks class when spending power — a resource mismatch fails `SPELL_FAILED_NO_POWER` cleanly
+  (`Spell.cpp:7244-7246`), it does not crash.
+  **Still unverified, and still blocking the power catalogue:** what the *client* does — whether a granted
+  spell's tooltip, icon, action bar and resource display behave as assumed (`[A]` in ADR-0010); scaling and
+  coefficients off-chassis; stance and form requirements; pet and aura assumptions; and which spells
+  silently no-op. Phase 1 must measure these in a real client, not infer them.
 - **V-3** Whether classic 1–60 quest and dungeon content in the 3.3.5a world DB supports a coherent solo
   levelling path at the intended pace without gaps.
 - **V-4** Behaviour of achievements, gear and reputations under a level-60 cap on a WotLK client.
