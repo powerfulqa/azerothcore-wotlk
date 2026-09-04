@@ -38,6 +38,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0022 | Offers are N options drawn from a single combined eligible pool | **Accepted** | 2026-09-05 |
 | 0023 | Build slots are finite, and replacement happens at acquisition | **Accepted** | 2026-09-05 |
 | 0024 | The augment layer is uncapped; achievements grant augments freely | **Accepted** | 2026-09-05 |
+| 0025 | Upgrades advance authored rank chains; depth capped by chain length; dropped rank remembered | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -1198,6 +1199,63 @@ uncapped growth, and the balance pass will have been tuned against unbounded sta
 
 ---
 
+## ADR-0025 — Upgrades advance authored rank chains; depth is capped by chain length; dropped rank is remembered
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q16 (all three parts), and D23-b
+
+**Context.** ADR-0009 made the upgrade a fourth option type and a *depth* axis. Q16 asked what an upgrade is,
+whether depth is capped, and — after ADR-0023 — what happens to accumulated investment when an upgraded
+ability is dropped for a new one.
+
+**What was verified.**
+- `[V]` The chain API is complete for this purpose: `GetFirstSpellInChain`, `GetLastSpellInChain`,
+  `GetNextSpellInChain`, `GetPrevSpellInChain`, `GetSpellRank` and **`GetSpellWithRank(spell_id, rank,
+  strict)`** (`src/server/game/Spells/SpellMgr.h:673-681`), over the `spell_ranks` world DB table.
+- `[V]` **Chains are strictly linear.** `spell_ranks` is `PRIMARY KEY (first_spell_id, rank)` with
+  `UNIQUE KEY (spell_id)` (`data/sql/base/db_world/spell_ranks.sql:23-29`), so exactly one spell exists per
+  rank per chain. **A fork is not expressible.**
+- `[V]` Each rank is a distinct client spell with its own name, icon and tooltip, so D10-b's tooltip-truth
+  criterion is satisfied without exception.
+
+**Decision.**
+1. **(a) Chains are authored, and mixed.** Most ranks intensify; some **transform** the ability at a defined
+   rank — a nuke gaining a cone, a heal becoming a shield — subject to a **same-role constraint**: whatever
+   the delivery, the ability stays in its role. This keeps ADR-0009's depth-versus-breadth distinction
+   intact, because the build's logic survives its own upgrades.
+2. **(b) Depth is capped by chain length**, authored per ability. A maxed ability simply stops being
+   eligible, feeding ADR-0022's natural taper. No separate cap mechanism is required.
+3. **(c) Dropped rank is remembered.** When an upgraded ability is dropped under ADR-0023's replacement rule,
+   its rank is retained in the life record; re-acquiring it later in the same life restores that rank.
+
+**Consequences.**
+
+- **D25-a — transformation happens *at* a rank, never as a choice *between* ranks.** Since `spell_ranks`
+  cannot express a fork, a branching upgrade would need a bespoke table and would abandon the stock
+  structures D10-e is built on. It is also unnecessary: the **draft is already the choice mechanism**, so the
+  chain does not need to be one. Player choice stays in the offer; the chain is deterministic.
+- **D25-b — the same-role constraint depends on D21-b.** The role-function tag axis is now doing two jobs:
+  generating ADR-0021's guarantees, and validating that an upgrade chain does not leave its role. D21-b was
+  already required; this makes it structurally load-bearing in a second place, reinforcing D22-c.
+- **D25-c — remembered rank is life-scoped and must be cleared on reset.** Per ADR-0007's three-anchor rule
+  it belongs to the life, not the vessel or the account. D7-a's manifest must clear it, or a vessel begins
+  its next life with rank memory it did not earn.
+- **D25-d — X-14 stays closed, and it is worth being explicit about why.** Remembered rank makes re-slotting
+  *cheap* rather than free, which brushes against D23-a's no-free-re-slotting rule. It does not reopen the
+  exploit, because **re-acquisition is gated to a level-up**: a player cannot swap tools reactively mid-
+  encounter, only at a milestone they do not control the timing of. Any future change that lets abilities be
+  re-acquired outside the level-up draft **does** reopen X-14.
+- **D25-e — `spell_ranks` becomes project-authored data, not inherited data.** We are defining chains the
+  base game never had, which means the existing rank relationships cannot be assumed correct for our
+  purposes and the table is now a curation artefact subject to T-5 and the D18-a world-rebuild invariant.
+- **D25-f — the upgrade pool's shape is now knowable.** Chain lengths determine how many upgrade options a
+  build can ever have, which makes ADR-0022's late-life upgrade skew (D22-e) quantifiable in advance rather
+  than emergent.
+
+**Cost to reverse.** Low for (b) and (c) — a cap is data and remembered rank is one field. Medium for (a),
+since authored chains that transform are a curation investment that intensification-only chains are not.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -1212,7 +1270,6 @@ custom DBC.
 | Q | Decision | Blocks | Cost to reverse |
 |---|---|---|---|
 | Q24 | Acceptable data-loss window, given D2-b requires staked deaths be auditable (D18-e) | Backup frequency; hardcore dispute handling | Medium |
-| **Q16** | Upgrade semantics: rank advance or swap? Is depth capped? **And what happens to the investment when an upgraded ability is dropped (D23-b)?** | Phase 4; acquisition schema; the sharpest feels-bad in the draft | **High** |
 | **Q27** | The technical trigger budget: what is the hard runtime ceiling on augment combat hooks, and how is it enforced? (D24-a) | Blocks Phase 5; T-7 is now unbounded by design | **High** |
 | Q4 | Module hosting: separate repo vs vendored in-tree | Phase 1 setup | Medium |
 | Q5 | Audience scale and realm openness | Anti-exploit budget, telemetry investment | Medium |
@@ -1222,4 +1279,4 @@ custom DBC.
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** Q16 (upgrade semantics, which must also resolve D23-b), then Q27, then Q24.
+**Next:** Q27 (the hard runtime trigger ceiling ADR-0024 made mandatory — it blocks Phase 5), then Q24.

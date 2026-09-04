@@ -486,11 +486,13 @@ Ordered by how much each constrains everything downstream.
   rerolls absorb a poor offer and its guarantees are *injected* above the draw. Residual risk **D22-a /
   H-8**: early-life offers could skew to proficiency; adding caps later is additive (D22-b). Also settles
   **D21-f** — the life-start weapon-family choice sits inside ADR-0009's wild card.
-- **Q16** — **Upgrade semantics** (D9-a). Is an upgrade a rank advance on the same spell, or a swap to a
-  different, stronger spell? Is upgrade depth capped, and does a capped ability stop being offered? **And
-  per D23-b, what happens to the accumulated investment when an upgraded ability is dropped for a new one —
-  partial refund, remembered rank, or accepted loss?** That is the sharpest feels-bad the slot model
-  creates.
+- **Q16 — ANSWERED 2026-09-05 → ADR-0025**, all three parts. **(a)** Upgrades advance **authored
+  `spell_ranks` chains**; most ranks intensify, some **transform** at a defined rank, subject to a
+  **same-role constraint**. `[V]` Chains are strictly linear — `PRIMARY KEY (first_spell_id, rank)` — so a
+  fork is not expressible and player choice stays in the draft (D25-a). **(b)** Depth is capped by chain
+  length; a maxed ability stops being eligible. **(c)** Dropped rank is **remembered in the life record**
+  and restored on re-acquisition, which `GetSpellWithRank` supports directly. X-14 stays closed because
+  re-acquisition is gated to a level-up (D25-d).
 - **Q17 — ANSWERED 2026-09-04 → ADR-0011.** Chassis keep their native resource; abilities are curated to
   match. Every tooltip stays true at zero engineering cost, but the chassis now carries real mechanical
   identity — this **amends P-1** above, by owner decision and per the pillars' own escape clause. Raised
