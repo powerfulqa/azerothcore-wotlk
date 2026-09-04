@@ -28,6 +28,8 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0012 | Every chassis carries every resource | **Accepted** | 2026-09-04 |
 | 0013 | A bundled client AddOn ships the multi-resource frame (amends T-10) | **Accepted** | 2026-09-04 |
 | 0014 | *Reserved — held in the private decision store (ADR-0005)* | **Accepted** | 2026-09-04 |
+| 0015 | The server runs in Docker on a dedicated remote host | **Accepted** | 2026-09-04 |
+| 0016 | The private decision store is a local repository with an encrypted offline backup | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -606,9 +608,109 @@ assumption of a rich UI would not survive its removal.
 
 This record is held in the project's private decision store rather than in the public fork, per ADR-0005,
 which reserved a separate private repository for material that should not be published. The number is
-reserved here so the sequence stays intact.
+reserved here so the sequence stays intact. **ADR-0016** establishes where that store lives.
 
-**Q21** — establishing where that private repository lives — is open and is tracked below.
+---
+
+## ADR-0015 — The server runs in Docker on a dedicated remote host
+
+**State:** Accepted (owner) · **Date:** 2026-09-04
+
+**Context.** The deployment target had not been recorded, so every earlier decision quietly assumed
+"somewhere". The owner has stated the intent: the server lives on a **separate machine**, in **Docker**.
+
+**What the repository already provides.** `[V]` Upstream ships first-class Docker support — `docker-compose.yml`
+defines `ac-database`, `ac-db-import`, `ac-worldserver`, `ac-authserver`, `ac-client-data-init`, `ac-tools`
+and `ac-dev-server`, with named volumes `ac-database`, `ac-client-data`, `ac-build-dev` and `ac-ccache-dev`
+(`docker-compose.yml:9-216`). Tooling lives in `apps/docker/` (`docker-cmd.sh`, `Dockerfile`,
+`Dockerfile.dev-server`, `entrypoint.sh`). Config templates are in `conf/dist/`, including `env.docker`.
+
+**Decision.** Deploy via upstream's Docker Compose stack on a dedicated host, separate from the development
+machine.
+
+**Consequences.**
+
+- **D15-a — no divergence required.** This is upstream's own supported path, so rule 13 is satisfied without
+  a core patch or a custom deployment fork. Any future divergence from the shipped compose stack should be
+  justified rather than drifted into.
+- **⚠ D15-b — the `ac-database` named volume holds every irreplaceable thing this project will ever have,
+  and it is one command from destruction.** `docker compose down -v` removes named volumes. T-6 already
+  states persistent progression has no reset valve, and D7-a establishes that the prestige reset has no undo.
+  Together these mean **a backup and restore policy is a prerequisite to creating the first persistent table,
+  not an operational nicety.** Recorded as a mandatory gate in `QA_STRATEGY.md`.
+- **D15-c — e2e topology is now an open question.** `AGENTS.md` prefers live-stack e2e "when a local
+  auth+world+MySQL stack is available". With the real stack on another machine, we must decide whether
+  development runs its own local stack (`ac-dev-server` exists for this), or tests reach the remote one.
+  Testing against the host that holds live player state is the option to avoid. This is **Q22**.
+- **D15-d — ADR-0003 gains a prerequisite.** azerothMCP reads a populated MySQL. On a remote containerised
+  database it needs either network reach to that container or to run on that host. ADR-0003's "install
+  immediately before Phase 1" plan now carries a networking and credentials step.
+- **D15-e — configuration and secrets need a story.** `conf/*.conf` is gitignored by design, so a remote
+  deploy cannot rely on the working tree. `conf/dist/env.docker` is the starting point; how config reaches
+  the host, and where credentials live, is undecided and must not default to "copied by hand".
+- **D15-f — this host is not the client-distribution host.** ADR-0014's packaging concerns and this game
+  server are separate systems with separate exposure. Do not conflate them.
+- Builds now have two plausible homes (dev machine vs `ac-dev-server` in-container). `.agents/docs/build.md`
+  governs either; the standing rule not to build unless asked is unchanged.
+
+**Cost to reverse.** Low while nothing is deployed. It rises sharply the moment live player state exists on
+that host, at which point moving means a migration with real data.
+
+---
+
+## ADR-0016 — The private decision store is a local repository with an encrypted offline backup
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q21
+
+**Context.** ADR-0005 reserved a private repository for material that should not be published but never
+established one. ADR-0014 then needed it, and until now that record survived as a single file in a gitignored
+directory — no history, no redundancy, one `git clean -xfd` from destruction. Four options were considered: a
+private GitHub repository; a self-hosted Forgejo/Gitea instance on the ADR-0015 host; a local repository with
+an encrypted offline backup; or encrypting the material inside the public repository.
+
+**Decision.** A **local git repository with no remote**, at `~/Projects/azerothcore-private`, backed up as a
+passphrase-encrypted archive copied off-machine manually.
+
+**Rationale.** No third party holds the material at any point. The rejected options each failed on something:
+a private GitHub repository would sit on the same platform and account as the public fork; the self-hosted
+option depends on a host that is not yet provisioned and whose own backup policy is still open (Q23);
+encrypting inside the public repository would publish ciphertext permanently, where a future key compromise
+discloses retroactively with no remedy.
+
+**What was set up.** `~/Projects/azerothcore-private` — `git init`, no remote, first commit `d3e9ac1`.
+ADR-0014 moved to `decisions/ADR-0014-distribution.md`, byte-for-byte identical (4574 bytes verified with
+`cmp`), and the loose copy in the main tree deleted only after the committed copy was confirmed. Commits use
+the same `users.noreply.github.com` identity as the public fork, per ADR-0005. `backup.sh` archives the
+repository including its history and encrypts it with `gpg --symmetric --cipher-algo AES256`.
+
+**The boundary**, recorded so it is not re-argued per file:
+
+| Private | Public |
+|---|---|
+| ADR-0014; all packaging and distribution decisions | Game design — vision, pillars, loops, balance |
+| The launcher codebase, once it exists | The server module |
+| Anything touching client acquisition | The client AddOn — our own original work |
+
+Genuinely ambiguous material goes private. Moving a record private→public later is safe; public→private is
+not, because publication is permanent (ADR-0005).
+
+**Consequences.**
+
+- **⚠ D16-a — redundancy is now a manual habit, and that is this decision's weak point.** `backup.sh`
+  produces the archive but cannot copy it off the machine or choose a passphrase. Until a backup has actually
+  been taken *and a restore tested*, the private record is one disk failure from gone. This is the same
+  failure mode D15-b makes a blocking gate for the game database; it deserves the same seriousness here.
+- **D16-b — no passphrase is stored anywhere, by design.** `[V]` `gpg` 2.4.9 is installed but the account has
+  **no secret key**, so encryption is passphrase-based. Losing the passphrase means losing the backup; it
+  belongs in a password manager, not in either repository.
+- **D16-c — the two records must cross-reference without the public one disclosing content.** The public log
+  keeps a neutral `ADR-0014 — Reserved` placeholder. That convention holds for every future private record.
+- **D16-d — migration stays cheap.** If the ADR-0015 host later runs a private git service, adopting it is
+  `git remote add` and a push; history carries over. This decision does not foreclose option B, it defers it
+  until that host has a proven restore.
+
+**Cost to reverse.** Low. It is a local repository with full history; it can gain a remote, or move, at any
+time.
 
 ---
 
@@ -623,7 +725,8 @@ ADR-0013 amends **T-10**, which now permits a required AddOn but still forbids M
 
 | Q | Decision | Blocks | Cost to reverse |
 |---|---|---|---|
-| **Q21** | Where does the project's private repository live, and what belongs in it? | Reserved by ADR-0005 but never established; ADR-0014 now needs it | **High** |
+| **Q22** | e2e topology: a local dev stack, or tests against the remote host? (D15-c) | How every live-stack test runs from Phase 1 on | **High** |
+| Q23 | Backup and restore policy for the `ac-database` volume (D15-b) | Prerequisite to the first persistent table | **High** |
 | **Q11** | May prestige change the vessel's chassis? (promoted by D11-d — chassis now fixes the ability pool) | Whether a vessel is locked out of most content for every life | **High** |
 | Q15 | Offer composition: one option of each type, or N from a combined pool? (wild card and per-level) | Feel of every choice; draft generator | Medium |
 | Q16 | Upgrade semantics: rank advance, or swap to a stronger spell? Is depth capped? (D9-a) | Phase 4; acquisition schema | Medium |
@@ -638,4 +741,4 @@ ADR-0013 amends **T-10**, which now permits a required AddOn but still forbids M
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** Q21 — ADR-0005 reserved a private repository but never established one. Then Q11.
+**Next:** Q22 — e2e topology, which shapes every live-stack test from Phase 1 on. Then Q11.

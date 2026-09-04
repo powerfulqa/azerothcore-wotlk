@@ -486,9 +486,10 @@ Ordered by how much each constrains everything downstream.
   stock APIs — no MPQ patch and no modified client. This **amends T-10** and raised **Q20**.
 - **Q20 — ANSWERED 2026-09-04 → ADR-0014**, which is held in the project's private decision store per
   ADR-0005 rather than in this public record.
-- **Q21 (next)** — **The private repository.** ADR-0005 reserved one for material that should not be
-  published but never established it. It is now needed. Where does it live, what moves into it, and how do
-  the two records cross-reference without the public one disclosing the private one?
+- **Q21 — ANSWERED 2026-09-05 → ADR-0016.** A local repository with no remote, backed up as a
+  passphrase-encrypted archive taken off-machine by hand, so no third party holds the material. The
+  public/private boundary is recorded in that ADR. Its known weakness is D16-a: redundancy is a manual habit
+  until a restore has actually been tested.
 
 ---
 
