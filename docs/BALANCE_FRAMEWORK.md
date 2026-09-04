@@ -115,6 +115,7 @@ one negative test** in `e2e/suites/` before the system that could cause it ships
 | X-11 | A single mandatory best build | Role coverage (P-5); outlier detection via M-2…M-5; pick-rate ceiling SM-4; a stated nerf policy |
 | X-12 | Draft rerolling by relog or session manipulation | Offers generated once and persisted transactionally with the acquisition point (D8-a); reroll spend recorded in the life row |
 | X-13 | A drafted proficiency whose gear never drops — a wasted slot, not an exploit but the same felt cost | Measure drop and quest-reward distribution by armour/weapon type and level band (V-3) before finalising the draft pool; keep the baseline set wide enough that no life is stranded (D20-c) |
+| X-14 | Loadout swapping to trivialise encounters — slotting tank tools for one fight, then swapping back | Replacement occurs **only at acquisition**; there is no free re-slotting (D23-a). Any future convenience that relaxes this reopens the exploit |
 
 **X-3 and X-4 are architectural, not incidental.** Trigger-depth guards must exist in the augment system's
 first commit. Retrofitting a re-entrancy guard into a shipped trigger system is how servers get duplication

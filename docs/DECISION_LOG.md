@@ -36,6 +36,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0020 | Baseline proficiencies are granted; heavier ones are drafted | **Accepted** | 2026-09-05 |
 | 0021 | The draft taxonomy: viability guarantees, and a baseline that mirrors the base game | **Accepted** | 2026-09-05 |
 | 0022 | Offers are N options drawn from a single combined eligible pool | **Accepted** | 2026-09-05 |
+| 0023 | Build slots are finite, and replacement happens at acquisition | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -1072,6 +1073,70 @@ weights is additive.
 
 ---
 
+## ADR-0023 — Build slots are finite, and replacement happens at acquisition
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q14, and an assumption that was never recorded
+
+**Context.** Q14 asked whether a player may decline an offer outright and whether unpicked options return to
+the pool. Both turned out to be downstream of something never decided.
+
+`[V]` **Finite build slots were assumed in three documents and decided in none:** `DESIGN_PILLARS.md:63`
+lists "a build slot" among Pillar 3's rewards, and `requirements/project-foundation.REQUIREMENTS.md:206` and
+`CORE_GAME_LOOP.md:153` both list "rerolls, build slots, controlled progression modifiers". Meanwhile Pillar
+2's Reject column reads **"Accumulation until every slot is filled with the best thing"**, with Accept being
+"constraints that make two strong powers mutually exclusive" (`DESIGN_PILLARS.md:41`). This log's own preamble
+covers the situation: *a decision that is not here was not made — it was assumed.*
+
+Without a slot limit, ADR-0009's 59 acquisitions are 59 pure gains, so declining is a dominated choice, the
+draft becomes an ordering exercise rather than a set of decisions, and Pillar 2's Reject condition is
+satisfied by construction.
+
+**Decision.**
+1. **Build slots are finite** — a bounded number of ability slots and talent slots — and slot capacity is
+   growable through persistent, account-scoped unlocks, which is the "build slot" reward Pillar 3 already
+   budgets for.
+2. **Replacement happens at acquisition.** Taking a new ability while full requires choosing one to drop, in
+   that moment.
+3. **Q14(a) — declining is permitted**, and means "keep my current set". It is a meaningful choice precisely
+   because slots are scarce.
+4. **Q14(b) — unpicked options return to the pool.** ADR-0022 draws from everything currently eligible; a
+   per-life exclusion set would add state and progressively starve late-life offers, and ADR-0008's rerolls
+   already supply the "spend something to change this offer" tension.
+
+**Consequences.**
+
+- **D23-a — replacement is *only* at acquisition; there is no free re-slotting.** This follows from Pillar 2:
+  if a player could rearrange their loadout at will, no two powers would ever be mutually exclusive and the
+  constraint would be decorative. It also closes an exploit — swapping in tank tools for one encounter and
+  swapping back — registered as **X-14**. This is a derived consequence rather than an explicit instruction,
+  and should be confirmed rather than assumed correct.
+- **D23-b — dropping an upgraded ability discards the upgrade investment**, which is the sharpest feels-bad
+  this decision creates. Options are a partial refund, remembering the rank if the ability is re-acquired, or
+  simply accepting the loss as the cost of the choice. It belongs to **Q16** (upgrade semantics), which must
+  now resolve it rather than treat upgrades in isolation.
+- `[O]` **D23-c — augments are unaddressed.** ADR-0001 names three power layers; slots are now decided for
+  abilities and talents but not for augments, which P-6 grants at level milestones. If augments are
+  uncapped, Pillar 2's accumulation failure simply relocates into that layer. **Q26.**
+- **D23-d — the reset manifest gains a precise distinction.** Per ADR-0007's three-anchor rule, **slot
+  capacity is account-scoped and must survive prestige**, while **slot contents are life-scoped and must be
+  cleared**. D7-a's manifest must treat them separately; conflating them either resets an earned reward or
+  carries a build across lives.
+- **D23-e — Pillar 2 is now satisfied structurally rather than aspirationally.** Its Accept column asked for
+  "constraints that make two strong powers mutually exclusive"; a bounded slot count is that constraint, and
+  it is the first mechanism in the design that actually delivers it.
+- **D23-f — slot counts and the growth curve are undefined** and are needed before Phase 4. The growth curve
+  couples directly to **Q8** (persistent currency shape), since a slot is one of the things that currency
+  buys. Too few slots and builds are thin; too many and the constraint stops biting.
+- **D23-g — the draft's late game changes character.** Once slots are full, every offer is a trade rather
+  than a gift, which is a materially different decision from the early game. Combined with D22-e (late offers
+  skewing to upgrades), the endgame draft is a different game from the opening one — worth communicating to
+  players deliberately rather than letting them discover it.
+
+**Cost to reverse.** High. Slot capacity is account-scoped persistent state, so it is schema-level from the
+first migration, and the entire balance of the draft assumes scarcity.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -1086,8 +1151,8 @@ custom DBC.
 | Q | Decision | Blocks | Cost to reverse |
 |---|---|---|---|
 | Q24 | Acceptable data-loss window, given D2-b requires staked deaths be auditable (D18-e) | Backup frequency; hardcore dispute handling | Medium |
-| Q16 | Upgrade semantics: rank advance, or swap to a stronger spell? Is depth capped? (D9-a) | Phase 4; acquisition schema | Medium |
-| Q14 | Decline semantics: may a draft be refused outright, and do unpicked powers return to the pool later in the life? | Feel of every draft; guarantee scheduling | Medium |
+| **Q16** | Upgrade semantics: rank advance or swap? Is depth capped? **And what happens to the investment when an upgraded ability is dropped (D23-b)?** | Phase 4; acquisition schema; the sharpest feels-bad in the draft | **High** |
+| **Q26** | Are augments slotted too, or does Pillar 2's accumulation failure relocate into that layer? (D23-c) | Whether the third power layer is bounded | **High** |
 | Q4 | Module hosting: separate repo vs vendored in-tree | Phase 1 setup | Medium |
 | Q5 | Audience scale and realm openness | Anti-exploit budget, telemetry investment | Medium |
 | Q7 | Nerf policy for already-acquired powers | X-11 enforcement credibility | Medium |
@@ -1096,4 +1161,4 @@ custom DBC.
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** Q14 (decline semantics — the last open question inside the draft), then Q24, then Q12/Q16/Q7.
+**Next:** Q26 (augment slots — the gap D23-c opened), then Q16, then Q24.

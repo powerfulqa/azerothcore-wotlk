@@ -473,9 +473,12 @@ Ordered by how much each constrains everything downstream.
   Shield**, two-handers and ranged are draftable. Grounded in `playercreateinfo_skills.sql`: cloth is the
   only universal, and mail and plate are already level-40 unlocks in the base game — so the split mirrors
   the base game's own gating rather than departing from it.
-- **Q14** — **Decline semantics.** May a player refuse a draft outright and bank nothing, and do unpicked
-  powers return to the pool later in the same life? Determines whether guarantees are one-shot, and changes
-  how every draft feels.
+- **Q14 — ANSWERED 2026-09-05 → ADR-0023**, together with an assumption that had never been recorded.
+  **Build slots are finite** (assumed in three documents, decided in none) and **replacement happens at
+  acquisition**. Declining is therefore permitted and means "keep my current set" — meaningful precisely
+  because slots are scarce. Unpicked options **return to the pool**, since ADR-0022 draws from everything
+  eligible and an exclusion set would starve late-life offers. **D23-a**: there is no free re-slotting, or
+  Pillar 2's mutual exclusivity would be decorative (see X-14). Raised **Q26**.
 - **Q15 — ANSWERED 2026-09-05 → ADR-0022.** **N options drawn from a single combined eligible pool**,
   unweighted. Composition shifts across a life on its own because eligibility shifts — proficiency fades as
   it is exhausted, upgrades rise as abilities accumulate. Defensible without weights because ADR-0008's
@@ -483,7 +486,10 @@ Ordered by how much each constrains everything downstream.
   H-8**: early-life offers could skew to proficiency; adding caps later is additive (D22-b). Also settles
   **D21-f** — the life-start weapon-family choice sits inside ADR-0009's wild card.
 - **Q16** — **Upgrade semantics** (D9-a). Is an upgrade a rank advance on the same spell, or a swap to a
-  different, stronger spell? Is upgrade depth capped, and does a capped ability stop being offered?
+  different, stronger spell? Is upgrade depth capped, and does a capped ability stop being offered? **And
+  per D23-b, what happens to the accumulated investment when an upgraded ability is dropped for a new one —
+  partial refund, remembered rank, or accepted loss?** That is the sharpest feels-bad the slot model
+  creates.
 - **Q17 — ANSWERED 2026-09-04 → ADR-0011.** Chassis keep their native resource; abilities are curated to
   match. Every tooltip stays true at zero engineering cost, but the chassis now carries real mechanical
   identity — this **amends P-1** above, by owner decision and per the pillars' own escape clause. Raised
@@ -517,6 +523,10 @@ Ordered by how much each constrains everything downstream.
   **draftable**. `[V]` Granting one is just teaching a spell — `SPELL_EFFECT_SKILL` (118) for the equip gate
   plus `SPELL_EFFECT_PROFICIENCY` (60) for the client bitmask — so it is draftable and legible for free.
   Makes gear a **fourth draft category** (D20-a) and registers **X-13** (loot dependency).
+- **Q26 (next)** — **Are augments slotted?** (D23-c) ADR-0023 bounded abilities and talents. ADR-0001 names
+  three power layers, and P-6 grants augments at level milestones. If augments are uncapped, Pillar 2's
+  accumulation failure does not go away — it relocates into the layer explicitly designed to *warp* builds,
+  where unbounded stacking would do the most damage.
 
 ---
 
