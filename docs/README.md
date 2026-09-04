@@ -45,7 +45,7 @@ next life wider and faster.
 **Foundation documentation only.** No code, no schema, no module, and no build has been
 run. Every design document is marked *Proposed* except the accepted ADRs.
 
-Twenty-one decisions are settled (one superseded the same day):
+Twenty-two decisions are settled (one superseded the same day):
 
 | ADR | In one line |
 |---|---|
@@ -70,15 +70,15 @@ Twenty-one decisions are settled (one superseded the same day):
 | **0021** | Guarantees cover **solo viability only** (sustain + defensive); P-5 role coverage moves to a pool obligation |
 | **0022** | Offers are **N drawn from one combined eligible pool** — composition shifts by itself as eligibility shifts |
 | **0023** | **Build slots are finite**, replacement happens at acquisition, declining keeps your set (answers Q14) |
+| **0024** | The **augment layer is uncapped**; PvE achievements grant augments freely — serves Pillar 1, strains Pillar 4 |
 
 Those answers raised ten further questions (Q11–Q20), one of which (Q18) was dissolved
 rather than answered. Fourteen remain open and are deliberately unanswered rather than
 guessed at.
 
-**Next action:** **Q26** — are augments slotted too? ADR-0023 bounded abilities and
-talents, so if augments stay uncapped Pillar 2's accumulation failure simply relocates into
-the third power layer. Then **Q16** (upgrade semantics, which must now also resolve what
-happens to the investment when an upgraded ability is dropped).
+**Next action:** **Q16** — upgrade semantics, which must also resolve what happens to the
+accumulated investment when an upgraded ability is dropped for a new one (D23-b). Then
+**Q27**, the hard runtime ceiling on augment combat hooks that ADR-0024 made mandatory.
 
 ## Conventions in these documents
 

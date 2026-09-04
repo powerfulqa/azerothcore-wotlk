@@ -117,6 +117,10 @@ one negative test** in `e2e/suites/` before the system that could cause it ships
 | X-13 | A drafted proficiency whose gear never drops — a wasted slot, not an exploit but the same felt cost | Measure drop and quest-reward distribution by armour/weapon type and level band (V-3) before finalising the draft pool; keep the baseline set wide enough that no life is stranded (D20-c) |
 | X-14 | Loadout swapping to trivialise encounters — slotting tank tools for one fight, then swapping back | Replacement occurs **only at acquisition**; there is no free re-slotting (D23-a). Any future convenience that relaxes this reopens the exploit |
 
+**X-3 and X-4 are now load-bearing, not merely architectural.** ADR-0024 left the augment layer uncapped,
+so the interaction surface grows combinatorially and these guards are the primary defence rather than a
+safety net. No augment ships before they are tested against adversarial combinations, not merely present.
+
 **X-3 and X-4 are architectural, not incidental.** Trigger-depth guards must exist in the augment system's
 first commit. Retrofitting a re-entrancy guard into a shipped trigger system is how servers get duplication
 bugs.
@@ -142,6 +146,7 @@ the phase that can test it completes.
 | H-6 | Stock 3.3.5a level-60 content will be trivialised by an optimised build; scaling or retuning will be required | Content proving appropriately tuned as-is | Phase 7, after V-1 |
 | H-7 | A 3-player tank/healer/DPS target is achievable without per-encounter bespoke tuning | Encounters requiring individual adaptation to be completable | Phase 7 |
 | H-8 | An unweighted combined-pool draw does not starve early lives of abilities, because rerolls and injected guarantees absorb bad offers (D22-a) | M-2/M-12 showing levels 2–8 offers skewed to proficiency, or early-life abandonment correlating with low early ability count | Phase 4 |
+| H-9 | An uncapped augment layer stays explainable, because the ADR-0013 AddOn surfaces augment state and active interactions (D24-c) | Players unable to state why their build works; SM-2 diverging from build complexity; support load about unexplained behaviour | Phase 5 |
 
 H-7 is the most optimistic entry here and should be tested early rather than assumed through to launch.
 

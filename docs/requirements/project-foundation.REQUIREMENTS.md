@@ -183,8 +183,9 @@ ends; account-scoped progression persists and compounds across lives, favouring 
   not per-item curation, because per-item curation does not scale.
 - **P-5 Role coverage.** Tank, healer, DPS and hybrid builds must all be reachable, and **multiple distinct
   archetypes must be viable for each role** (not one per role).
-- **P-6 Augments.** Roguelite augments are earned at level milestones and, potentially, from defined PvE
-  achievements. They *warp* the build — resource changes, cooldown changes, area effects, triggers,
+- **P-6 Augments.** Roguelite augments are earned at level milestones **and from defined PvE achievements,
+  which raise the total — the layer is uncapped (ADR-0024)**. They must always be *offered as a choice*
+  rather than granted bare, or Pillar 2 fails in this layer. They *warp* the build — resource changes, cooldown changes, area effects, triggers,
   scaling transformations, defensive conversions, risk/reward trades. They are a distinct layer from
   abilities and talents and must never be presented as the same thing.
 - **P-7 Legibility.** A player must be able to explain why their build works. Confusing power is churn.
@@ -523,10 +524,17 @@ Ordered by how much each constrains everything downstream.
   **draftable**. `[V]` Granting one is just teaching a spell — `SPELL_EFFECT_SKILL` (118) for the equip gate
   plus `SPELL_EFFECT_PROFICIENCY` (60) for the client bitmask — so it is draftable and legible for free.
   Makes gear a **fourth draft category** (D20-a) and registers **X-13** (loot dependency).
-- **Q26 (next)** — **Are augments slotted?** (D23-c) ADR-0023 bounded abilities and talents. ADR-0001 names
-  three power layers, and P-6 grants augments at level milestones. If augments are uncapped, Pillar 2's
-  accumulation failure does not go away — it relocates into the layer explicitly designed to *warp* builds,
-  where unbounded stacking would do the most damage.
+- **Q26 — ANSWERED 2026-09-05 → ADR-0024.** The augment layer is **uncapped**; PvE achievements grant
+  augments and raise the total. Serves **Pillar 1** more directly than any other decision — its Accept
+  column's own example is "an augment earned by clearing a specific dungeon". Pillar 2 holds *provided
+  augments are offered as a choice, never a bare grant*. Costs recorded: **D24-a** T-7's trigger budget is
+  now unbounded by design and needs a hard runtime ceiling (**Q27**); **D24-b** X-3/X-4 guards become
+  load-bearing; **D24-c** Pillar 4 is strained and the ADR-0013 AddOn must surface augment state to rescue
+  it (**H-9**).
+- **Q27 (after Q16)** — **The technical trigger budget** (D24-a). `[V]` T-7 exists because
+  `UnitScript::OnDamage`/`OnHeal` run at very high frequency. With an unbounded augment count, per-event
+  cost is unbounded too, so a hard runtime ceiling — enforced regardless of any design cap — is mandatory.
+  What is the budget, how is it measured, and what happens when a build exceeds it?
 
 ---
 

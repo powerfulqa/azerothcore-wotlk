@@ -82,6 +82,11 @@ their build works. Power the player cannot understand is churn, not depth.
 | Synergies discoverable from tooltips and observed behaviour | Synergies that require a spreadsheet or an external wiki |
 | Clear feedback when a trigger fires | Silent internal state the player must infer |
 
+**Strained by ADR-0024**, which left the augment layer uncapped. Fifteen stacked warping effects is not
+obviously explainable in one sentence. The mitigation is the ADR-0013 AddOn: it **must** surface augment
+state and active interactions, and **H-9** exists to measure whether that is enough. If H-9 is falsified,
+this pillar and ADR-0024 are in genuine conflict and one of them must change by ADR.
+
 **Guards:** Requirements P-6, P-7, H-5, T-10. This pillar was under constant pressure from the stock-client
 constraint, which made it harder here than on a server with an AddOn. **ADR-0013 lifts that handicap:** the
 project now ships its own bundled AddOn, so custom UI is available. The pillar still binds — a rich UI makes

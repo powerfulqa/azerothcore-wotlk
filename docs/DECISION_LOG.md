@@ -37,6 +37,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0021 | The draft taxonomy: viability guarantees, and a baseline that mirrors the base game | **Accepted** | 2026-09-05 |
 | 0022 | Offers are N options drawn from a single combined eligible pool | **Accepted** | 2026-09-05 |
 | 0023 | Build slots are finite, and replacement happens at acquisition | **Accepted** | 2026-09-05 |
+| 0024 | The augment layer is uncapped; achievements grant augments freely | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -1137,6 +1138,66 @@ first migration, and the entire balance of the draft assumes scarcity.
 
 ---
 
+## ADR-0024 — The augment layer is uncapped; achievements grant augments freely
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q26 · **Strains:** Pillar 4
+
+**Context.** ADR-0023 bounded abilities and talents with finite slots. Q26 asked whether augments needed the
+same. Three options were put: the milestone schedule as an implicit bound with exclusivity rules; explicit
+slots with replacement; or leaving the layer uncapped with PvE achievements granting freely. The owner chose
+the third, with the trade-offs stated.
+
+**Decision.** The augment layer is **uncapped**. Augments accrue from level milestones **and** from defined
+PvE achievements, and achievements **raise the total** rather than merely reordering it.
+
+**What this buys.** `[V]` It serves **Pillar 1** more directly than any other decision in this project.
+Pillar 1's Accept column literally reads *"an augment earned by clearing a specific dungeon"* against the
+Reject *"a vendor that sells the same augment in a hub"* (`DESIGN_PILLARS.md`). Tying unbounded power growth
+to world engagement is the pillar's own worked example, and it makes dungeons, elites and exploration matter
+more rather than less. Against Risk R-1 — distinctiveness from systems rather than content — this is a
+stronger answer than a capped layer would have been.
+
+**Pillar 2 is not violated, provided each augment is chosen.** Pillar 2 rejects "accumulation until every
+slot is filled with the best thing", but its actual test is *"is the player making a decision with a real
+cost?"* If each augment is offered as a choice among alternatives, the cost is paid at every grant and the
+pillar holds. **What this decision gives up is total scarcity, not the decision itself** — so the late-game
+trade-off ADR-0023 created for abilities has no counterpart here. **Requirement: augments must be offered as
+a choice, never as a bare grant.** Without that, Pillar 2 does fail in this layer.
+
+**Consequences — the three real costs, recorded rather than discovered later.**
+
+- **⚠ D24-a — T-7's trigger budget becomes unknowable at design time, so it needs a *technical* ceiling
+  regardless.** `[V]` T-7 exists because `UnitScript::OnDamage`/`OnHeal` "run at very high frequency"
+  (`requirements/project-foundation.REQUIREMENTS.md:235`). Each augment potentially adds a combat-path hook,
+  so an unbounded count means unbounded per-event cost. **A hard technical ceiling — a trigger budget
+  enforced at runtime, independent of any design cap — is now mandatory rather than prudent.** This is
+  **Q27** and it blocks Phase 5.
+- **⚠ D24-b — X-3 and X-4 move from architectural to load-bearing.** `BALANCE_FRAMEWORK.md:120` already
+  states trigger-depth guards and re-entrancy protection "must exist in the augment system's design, not be
+  retrofitted". With *n* unbounded, the interaction surface grows combinatorially, so those guards are now
+  the primary defence rather than a safety net. No augment may ship before they are tested against
+  adversarial combinations, not merely present.
+- **D24-c — Pillar 4 is genuinely strained, and the mitigation already exists.** Pillar 4 requires that a
+  player "be able to say, in one sentence, why their build works". Fifteen stacked warping effects makes that
+  implausible on its face. **ADR-0013 is what rescues this:** D13-d recorded that shipping our own AddOn
+  lifts Pillar 4's stock-client handicap. That now becomes a *requirement* rather than an opportunity — **the
+  AddOn must surface augment state and active interactions legibly**, or this decision breaks the pillar.
+  Registered as **H-9** so it is measured rather than argued.
+- **D24-d — exclusivity rules are needed *more*, not less.** Option A would have used P-4 eligibility to
+  prevent dangerous combinations alongside a count bound. Without the bound, P-4's exclusivity rules are the
+  only thing standing between the design and X-3/X-4, which reinforces D22-c: P-4 is the highest-leverage
+  component in the entire system.
+- **D24-e — the reset manifest is unaffected in principle but grows in practice.** Augments are run-scoped
+  (ADR-0001), so D7-a clears them; an unbounded count simply means more rows, not a new category.
+- **D24-f — achievement-granted augments couple this layer to V-1 and V-4.** Which achievements exist and
+  are attainable at a level-60 cap on a WotLK client is explicitly unverified. The augment source list cannot
+  be finalised before Phase 1 measures it.
+
+**Cost to reverse.** Medium-to-high. Capping later is a takeaway from players who have learned to expect
+uncapped growth, and the balance pass will have been tuned against unbounded stacking.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -1152,7 +1213,7 @@ custom DBC.
 |---|---|---|---|
 | Q24 | Acceptable data-loss window, given D2-b requires staked deaths be auditable (D18-e) | Backup frequency; hardcore dispute handling | Medium |
 | **Q16** | Upgrade semantics: rank advance or swap? Is depth capped? **And what happens to the investment when an upgraded ability is dropped (D23-b)?** | Phase 4; acquisition schema; the sharpest feels-bad in the draft | **High** |
-| **Q26** | Are augments slotted too, or does Pillar 2's accumulation failure relocate into that layer? (D23-c) | Whether the third power layer is bounded | **High** |
+| **Q27** | The technical trigger budget: what is the hard runtime ceiling on augment combat hooks, and how is it enforced? (D24-a) | Blocks Phase 5; T-7 is now unbounded by design | **High** |
 | Q4 | Module hosting: separate repo vs vendored in-tree | Phase 1 setup | Medium |
 | Q5 | Audience scale and realm openness | Anti-exploit budget, telemetry investment | Medium |
 | Q7 | Nerf policy for already-acquired powers | X-11 enforcement credibility | Medium |
@@ -1161,4 +1222,4 @@ custom DBC.
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** Q26 (augment slots — the gap D23-c opened), then Q16, then Q24.
+**Next:** Q16 (upgrade semantics, which must also resolve D23-b), then Q27, then Q24.
