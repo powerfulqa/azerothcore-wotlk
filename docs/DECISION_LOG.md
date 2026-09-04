@@ -41,6 +41,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0025 | Upgrades advance authored rank chains; depth capped by chain length; dropped rank remembered | **Accepted** | 2026-09-05 |
 | 0026 | NG-8 narrowed: mechanics and balance values may be studied; expression may not be used | **Accepted** | 2026-09-05 |
 | 0027 | The draft carries three tools: reroll, hold and remove | **Accepted** | 2026-09-05 |
+| 0028 | Two layers, one currency, and every sink is agency | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -1380,6 +1381,64 @@ but the removed set is life-scoped persistent state and therefore schema-level f
 
 ---
 
+## ADR-0028 — Two layers, one currency, and every sink is agency
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q8
+
+**Context.** Q8 asked for the persistent currency's shape — one currency, several, or unlock-on-achievement
+with none. The comparative survey (ADR-0026) surfaced a structural question underneath it. The reference
+roguelite runs **three** layers: a run, an account-level skill tree bought with currency, and a *meta-prestige*
+that destroys the tree investment in exchange for a permanent earn-rate multiplier. Its gate is elegant —
+you must have **invested**, not merely hoarded, so a reset cannot be rushed. But it is a third layer.
+
+**Decision.**
+1. **Two layers only.** A life, and the account. **Account progression only ever accumulates**; there is no
+   meta-prestige and no reset of account state. **T-6's reasoning stands unchanged** — persistent state has
+   no reset valve, so schema quality matters from the first table.
+2. **One currency**, not several. Multiple currencies multiply both the balance surface (Pillar 5) and the
+   legibility burden (Pillar 4), and Pillar 1 is already served without them: ADR-0024 gates augments behind
+   PvE achievements rather than behind a purchase.
+3. **Every sink is agency.** The currency buys, and only buys, the rewards our own decisions have already
+   created:
+   - **slot capacity** (ADR-0023)
+   - **the draft width N**, and a **wider curated pool** (ADR-0008, Pillar 3's named rewards)
+   - the **reroll, hold and remove budgets** (ADR-0027)
+
+**Consequences.**
+
+- **D28-a — Pillar 3 is satisfied structurally, not by vigilance.** Pillar 3 requires that persistent
+  progression "widens choices before it raises numbers", and its Reject example is a flat account-wide damage
+  bonus. Under this decision **nothing power-shaped is for sale at all** — the shop has no power in it. That
+  is a much stronger guarantee than an intention to be careful, and it is why the reference server's earn-rate
+  multiplier was not adopted: a rate is a number, and Pillar 3's test asks whether an unlock gives a new
+  decision.
+- **D28-b — D2-a is also satisfied structurally.** ADR-0002 forbids any persistent unlock reachable *only*
+  through a staked life. With a single currency, a staked life earns **more of the same currency** rather than
+  exclusive rewards, so the constraint cannot be violated by construction. It also means stake modifiers have
+  an obvious payout shape: they multiply one number, which M-9's economy ledger already tracks.
+- `[O]` **D28-c — every sink eventually maxes out, and then the economy is over.** The reference server's
+  multiplier exists precisely to be a sink of last resort once its tree is complete. Ours will hit the same
+  wall: a player who has bought every slot, the widest pool and full budgets has nothing left to earn for.
+  This is a **retention-at-full-mastery** problem, deliberately deferred rather than solved here — **Q28**,
+  Phase 7. Option B remains available then, and will be a better decision with live data than a guess now.
+- `[O]` **D28-d — when currency is credited is unresolved and exploit-relevant.** Credited continuously, a
+  player loses nothing by abandoning a life, and there is no pull to finish. Credited at life end, quitting
+  mid-life forfeits everything, which is harsh and creates completion pressure. It also touches **X-9** (reset
+  abuse) and **D2-b** (staked endings must be auditable). **Q29**, and it must be settled before the Phase 2
+  schema, not after.
+- **D28-e — the reset manifest is clarified rather than complicated.** The currency balance is
+  account-scoped and **survives prestige**; per ADR-0007's three-anchor rule it belongs to the account, never
+  the vessel or the life. D7-a's manifest must not clear it.
+- **D28-f — one currency keeps the telemetry honest.** M-9 tracks generation and spending against a single
+  quantity, so the economy is measurable end-to-end from the first migration. Several currencies would have
+  made every balance question a joint distribution.
+
+**Cost to reverse.** Medium. The currency itself is one account-scoped quantity and its sinks are all things
+we were building anyway, so adding a second currency or a meta-prestige later is additive rather than
+destructive — but any sink priced against a single-currency economy would need repricing.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -1398,9 +1457,11 @@ custom DBC.
 | Q4 | Module hosting: separate repo vs vendored in-tree | Phase 1 setup | Medium |
 | Q5 | Audience scale and realm openness | Anti-exploit budget, telemetry investment | Medium |
 | Q7 | Nerf policy for already-acquired powers | X-11 enforcement credibility | Medium |
-| Q8 | Persistent currency shape — and which anchor each unlock hangs from (D7 three-anchor rule) | Phase 2/3 schema | High |
+| **Q29** | When is currency credited — continuously, or at life end? (D28-d) | Phase 2 schema; X-9 reset abuse; D2-b auditability | **High** |
+| Q28 | Retention once every sink is maxed — the economy's terminal state (D28-c) | Phase 7 | Medium |
 | Q9 | Disconnect / server-fault deaths in staked lives | Player trust; D2-c | Medium |
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** Q27 (the hard runtime trigger ceiling ADR-0024 made mandatory — it blocks Phase 5), then Q24.
+**Next:** the remaining survey items — the dynamic difficulty cap (amends ADR-0002) and the gear affix
+layer — then Q29, Q27 and Q24.

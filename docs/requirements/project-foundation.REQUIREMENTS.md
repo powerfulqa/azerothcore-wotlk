@@ -457,8 +457,11 @@ Ordered by how much each constrains everything downstream.
   and by level 60 it is inert. Player-facing language describes an origin, not a profession.
 - **Q7** — **Nerf policy** (X-11 gap): what happens to a player who already owns a power we nerf — retroactive,
   grandfathered, or refunded?
-- **Q8** — **Persistent currency shape**: one currency, several, or direct unlock-on-achievement with no
-  currency at all?
+- **Q8 — ANSWERED 2026-09-05 → ADR-0028.** **Two layers** (life, account) with **no meta-prestige**, so
+  T-6's no-reset-valve reasoning stands. **One currency**, whose only sinks are agency: slot capacity,
+  draft width and pool breadth, and the reroll/hold/remove budgets. **Nothing power-shaped is for sale**,
+  which satisfies Pillar 3 and D2-a structurally rather than by vigilance. Raised **Q28** (retention once
+  sinks max out, Phase 7) and **Q29** (when currency is credited — exploit-relevant, blocks Phase 2).
 - **Q9** — **Disconnect/server-fault deaths in staked lives** (D2-c): forgiven, appealed, or final?
 - **Q10** — **Planning-doc location**: keep `.claude/plans/` per your instruction and amend `AGENTS.md`, or
   switch to `.agents/plans/` per the repo's existing convention? Both are gitignored.
