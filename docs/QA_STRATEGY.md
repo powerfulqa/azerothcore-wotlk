@@ -62,7 +62,9 @@ A change type not listed defaults to the strictest comparable row.
 volume, `ac-database`, which `docker compose down -v` destroys. T-6 gives persistent progression no reset
 valve and D7-a gives the prestige reset no undo, so there is no recovery path other than a backup. A
 **tested restore** — not merely a configured backup — is a prerequisite to creating the first persistent
-table. Q23 tracks the policy.
+table. **ADR-0018 settles the policy** (encrypted logical dumps of `acore_auth` and `acore_characters`, with
+the restore asserted automatically in the same job). Per D18-c the gate still stands: the policy is designed
+but cannot yet be exercised, and only a restore that has actually run satisfies this.
 
 **`[O]` The AddOn is a new test layer this document does not yet cover.** ADR-0013 (D13-c) adds a Lua
 codebase with its own release cycle, version-locked to the server. A stale AddOn misreporting resources is

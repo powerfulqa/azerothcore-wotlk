@@ -31,6 +31,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0015 | The server runs in Docker on a dedicated remote host | **Accepted** | 2026-09-04 |
 | 0016 | The private decision store is a local repository with an encrypted offline backup | **Accepted** | 2026-09-05 |
 | 0017 | Live e2e runs against a full local Docker stack on the development machine | **Accepted** | 2026-09-05 |
+| 0018 | Backups are encrypted logical dumps of the irreplaceable databases, with an automated restore test | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -770,6 +771,61 @@ says.
 
 ---
 
+## ADR-0018 — Backups are encrypted logical dumps of the irreplaceable databases, with an automated restore test
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q23
+
+**Context.** D15-b made a *tested restore* a blocking prerequisite to creating the first persistent table:
+the database lives in the `ac-database` Docker named volume, `docker compose down -v` destroys it, and T-6
+and D7-a leave no reset valve and no undo. D16-a is the same gap in the private decision store.
+
+**What was verified.**
+- `[V]` The three databases are not equivalent. Base sizes: `db_world` **297 MB**, `db_characters` **444 KB**,
+  `db_auth` **116 KB** (`data/sql/base/`). `acore_world` is **rebuilt from the repository** by the
+  `ac-db-import` service (`acore/ac-wotlk-db-import`, `docker-compose.yml:27-54`); `acore_characters` and
+  `acore_auth` hold everything that cannot be regenerated.
+- `[V]` All tables are InnoDB (`data/sql/base/db_characters/characters.sql`), so
+  `mysqldump --single-transaction` yields a consistent snapshot without stopping the server.
+- `[V]` AzerothCore ships **no** backup tooling — nothing matching *backup* or *dump* exists under `apps/`.
+  This is ours to build.
+
+**Decision.** Scheduled **logical dumps of `acore_auth` and `acore_characters` only**, encrypted, stored
+off-host, with the **restore verified automatically inside the same job** — the dump is loaded into a
+throwaway MySQL container and asserted against (row counts, and a known character loading). `acore_world` is
+excluded because it is reproducible from version control.
+
+**Consequences.**
+
+- **D18-a — excluding `acore_world` makes T-5 load-bearing.** T-5 already requires every schema change to
+  travel through `data/sql/updates/pending_db_*`. This decision depends on that: **if `acore_world` ever
+  holds anything not reproducible from `data/sql/`, that is a process violation, not a backup gap.** The
+  dependency should be *checked* rather than trusted — a periodic comparison of the live world schema against
+  the repository is the natural enforcement, and it converts T-5 from a convention into a verified invariant.
+- **D18-b — the restore test is the deliverable, not the dump.** A job that produces archives but does not
+  load one back does **not** satisfy D15-b. An unverified backup is an assumption with a filename.
+- **D18-c — this cannot be implemented or verified yet.** There is no host, no container and no database, so
+  a script written today could not have its restore step exercised. Per rule 10 nothing may be claimed as
+  working until it has run. **D15-b's gate therefore stands unchanged:** the first persistent table waits on
+  this being real and *tested*, not on it being designed.
+- **D18-d — passphrase handling matches D16-b.** `[V]` The account has no GPG secret key, so encryption is
+  passphrase-based. The passphrase belongs in a password manager, never in either repository, and losing it
+  loses the backups.
+- `[O]` **D18-e — the acceptable data-loss window is a design question, not only an operational one.**
+  ADR-0002's **D2-b** requires staked life endings to be *fully auditable* — cause, location, source,
+  timestamp — because a disputed hardcore death is a support incident. A restore that rewinds several hours
+  can resurrect a character the realm recorded as dead, or erase the evidence of a legitimate death. The
+  backup frequency therefore has to be derived from what a hardcore player would accept losing, not from
+  convenience. This is **Q24**.
+- **D18-f — the private store can be protected today.** `~/Projects/azerothcore-private/backup.sh` already
+  exists; it needs to be run, its output copied off the machine, and verified by decrypting and running
+  `git fsck`. **No backup of it has been taken yet**, so that record remains a single copy on one disk.
+- Schedule, retention and destination remain operational parameters to fix when the host exists; only the
+  *shape* of the policy is settled here.
+
+**Cost to reverse.** Low — it is tooling. The cost of *not having it* before live data exists is unbounded.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -781,7 +837,7 @@ ADR-0013 amends **T-10**, which now permits a required AddOn but still forbids M
 
 | Q | Decision | Blocks | Cost to reverse |
 |---|---|---|---|
-| Q23 | Backup and restore policy for the `ac-database` volume (D15-b) | Prerequisite to the first persistent table | **High** |
+| Q24 | Acceptable data-loss window, given D2-b requires staked deaths be auditable (D18-e) | Backup frequency; hardcore dispute handling | Medium |
 | **Q11** | May prestige change the vessel's chassis? (promoted by D11-d — chassis now fixes the ability pool) | Whether a vessel is locked out of most content for every life | **High** |
 | Q15 | Offer composition: one option of each type, or N from a combined pool? (wild card and per-level) | Feel of every choice; draft generator | Medium |
 | Q16 | Upgrade semantics: rank advance, or swap to a stronger spell? Is depth capped? (D9-a) | Phase 4; acquisition schema | Medium |
@@ -796,5 +852,5 @@ ADR-0013 amends **T-10**, which now permits a required AddOn but still forbids M
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** Q23 — backup and restore policy, which D15-b makes a prerequisite to the first persistent
-table. Then Q11.
+**Next:** Q11, then Q24. Note ADR-0012 defused much of what made Q11 urgent — re-read its
+cost-to-reverse before spending a question on it.

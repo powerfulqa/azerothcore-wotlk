@@ -45,7 +45,7 @@ next life wider and faster.
 **Foundation documentation only.** No code, no schema, no module, and no build has been
 run. Every design document is marked *Proposed* except the accepted ADRs.
 
-Fifteen decisions are settled (one superseded the same day):
+Sixteen decisions are settled (one superseded the same day):
 
 | ADR | In one line |
 |---|---|
@@ -64,14 +64,15 @@ Fifteen decisions are settled (one superseded the same day):
 | **0015** | The server runs in **Docker on a dedicated remote host** — upstream's own compose stack, no divergence |
 | **0016** | The private decision store is a **local repository with an encrypted offline backup** — no third party holds it |
 | **0017** | Live e2e runs against a **full local Docker stack**; the production host is never a test target |
+| **0018** | Backups are **encrypted logical dumps of `auth`+`characters`** with an automated restore test; `world` is rebuilt from the repo |
 
 Those answers raised ten further questions (Q11–Q20), one of which (Q18) was dissolved
 rather than answered. Fourteen remain open and are deliberately unanswered rather than
 guessed at.
 
-**Next action:** answer **Q23** — the backup and restore policy. D15-b makes a *tested
-restore* a blocking prerequisite to creating the first persistent table, and D16-a leaves
-the private store with the same gap. Then **Q11**.
+**Next action:** **Q11** — may prestige change the vessel's chassis? Re-read its
+cost-to-reverse first: ADR-0012 gave every chassis every resource, which defused most of
+what made this urgent. Then **Q24**.
 
 ## Conventions in these documents
 

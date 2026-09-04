@@ -495,11 +495,14 @@ Ordered by how much each constrains everything downstream.
   `[V]` Justified because the suite is destructive by design — it creates GM level 3 accounts and writes
   world-DB rows with mandatory cleanup (`e2e/README.md:25`, `:220`, `:228-232`). Residual risk **D17-c**: a
   loopback guard was offered and declined, so the control is procedural rather than enforced.
-- **Q23 (next)** — **Backup and restore policy.** **D15-b** makes a *tested restore* — not merely a
-  configured backup — a blocking prerequisite to creating the first persistent table, because the database
-  lives in the `ac-database` named volume that `docker compose down -v` destroys, and T-6 and D7-a leave no
-  reset valve and no undo. **D16-a** is the same gap in the private decision store, where no backup has yet
-  been taken. What is the schedule, retention, destination and restore-verification procedure, for both?
+- **Q23 — ANSWERED 2026-09-05 → ADR-0018.** Encrypted logical dumps of `acore_auth` and `acore_characters`
+  only, scheduled and stored off-host, with the restore asserted automatically in the same job.
+  `acore_world` is excluded because `ac-db-import` rebuilds it from `data/sql/` — which makes T-5
+  load-bearing (D18-a). Per D18-c this is designed but not yet exercisable, so D15-b's gate stands.
+- **Q24** — **Acceptable data-loss window** (D18-e). D2-b requires staked life endings to be fully
+  auditable, so a restore that rewinds hours could resurrect a character the realm recorded as dead, or
+  destroy the evidence of a legitimate one. Backup frequency must follow from what a hardcore player would
+  accept losing, not from convenience.
 
 ---
 
