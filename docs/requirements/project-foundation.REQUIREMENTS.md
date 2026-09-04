@@ -151,9 +151,10 @@ ends; account-scoped progression persists and compounds across lives, favouring 
 - **NG-6** No modification of the game client binary or its data: no MPQ patch, no custom DBC.
   *(Amended by ADR-0013: a required first-party AddOn is permitted and is not a client modification.)*
 - **NG-7** **No PvP scope**, at any point in the project. PvP balance is explicitly not a design dimension.
-- **NG-8** No third-party server's code, database, UI, assets, branding, terminology, exact mechanics,
-  balance values, custom content, text or proprietary designs. Inspiration is limited to publicly-observable
-  genre principles; every artefact is original.
+- **NG-8** **Narrowed by ADR-0026 (2026-09-05).** No third-party server's code, database, UI layouts,
+  assets, branding, terminology, text, or files of any kind. **Their mechanics and balance values may be
+  studied and used as design input**; their *expression* may not be taken. The principle: mechanics and
+  numbers may be learned, expression may not be copied. Every artefact we ship is still written by us.
 - **NG-9** No commercial activity, monetisation, paid access, or donation-for-power.
 
 ---
@@ -425,7 +426,7 @@ run and its output shown. This binds me without exception.
   namespacing, rebase cadence and performance budgets.
 - **AC-7** The §11 phase backlog is approved or amended.
 - **AC-8** `docs/PROJECT_VISION.md` survives an explicit "why play this rather than retail or another
-  classless/roguelite server?" test, and restates NG-8/NG-9.
+  classless/roguelite server?" test, and restates NG-8 **as narrowed by ADR-0026** plus NG-9.
 - **AC-9** No file outside `docs/` and `.claude/plans/` is modified. No SQL. No C++. No build.
 
 ---

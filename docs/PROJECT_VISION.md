@@ -90,10 +90,11 @@ Metric plumbing is specified in `BALANCE_FRAMEWORK.md` §4 and is a Phase 3 prer
 
 ## 7. Legal and commercial stance
 
-- **Original work only.** No third-party server's code, database, UI, assets, branding, terminology, exact
-  mechanics, balance values, custom content, text or proprietary designs are used. Where other projects are
-  referenced, it is for publicly-observable *genre principles* only, and the implementation here is
-  independently designed. (Requirements NG-8.)
+- **Everything we ship is written by us.** No third-party server's code, database, UI layouts, assets,
+  branding, terminology, text or files are used. **Other servers in this genre are studied openly**, and
+  since ADR-0026 that includes their mechanics and balance values — but the distinction is firm: *mechanics
+  and numbers may be learned; expression may not be taken*. Every artefact here is our own.
+  (Requirements NG-8, as narrowed by ADR-0026.)
 - **Non-commercial.** No monetisation, no paid access, no donation-for-power, no commercial activity of any
   kind. (Requirements NG-9.)
 - **No Blizzard asset creation.** The project authors no game art, music, text or branding, and the server

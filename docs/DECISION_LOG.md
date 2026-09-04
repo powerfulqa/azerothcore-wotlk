@@ -39,6 +39,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0023 | Build slots are finite, and replacement happens at acquisition | **Accepted** | 2026-09-05 |
 | 0024 | The augment layer is uncapped; achievements grant augments freely | **Accepted** | 2026-09-05 |
 | 0025 | Upgrades advance authored rank chains; depth capped by chain length; dropped rank remembered | **Accepted** | 2026-09-05 |
+| 0026 | NG-8 narrowed: mechanics and balance values may be studied; expression may not be used | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -1253,6 +1254,69 @@ ability is dropped for a new one.
 
 **Cost to reverse.** Low for (b) and (c) — a cap is data and remembered rank is one field. Medium for (a),
 since authored chains that transform are a curation investment that intensification-only chains are not.
+
+---
+
+## ADR-0026 — NG-8 is narrowed: mechanics and balance values may be studied; expression may not be used
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Amends:** NG-8, and `PROJECT_VISION.md` §7
+
+**Context.** Three private-server installations are available locally for study — `/mnt/Games/Grimfall/`
+(classless, the primary reference per the Grimfall notes), `/mnt/Games/Ebonhold/` and `/mnt/Games/Eclipse/`
+(both roguelite). The owner wants to draw on all three. `[V]` Their layouts differ materially: Grimfall keeps
+91 addons in a loose `Interface/AddOns` tree, while **Ebonhold (10 custom MPQs) and Eclipse (4) hold their
+custom content entirely inside MPQ archives**, with no loose addons at all, so extraction is required to
+study them.
+
+NG-8 as written forbade "code, database, UI, assets, branding, terminology, **exact mechanics, balance
+values**, custom content, text or proprietary designs", limiting inspiration to "publicly-observable genre
+principles". Studying these servers' mechanics directly was therefore outside it.
+
+**Decision.** NG-8 is **narrowed, not removed.** Two items are struck from its prohibition list — **exact
+mechanics** and **balance values** — which may now be studied, recorded and used as direct design input.
+**Everything else in NG-8 stands unchanged.**
+
+**The line, stated precisely because the distinction is the whole point.**
+
+| Permitted (from this ADR) | Still forbidden (NG-8 unchanged) |
+|---|---|
+| How a system works — what is gated, capped, chosen, when | Their **code**, Lua, SQL, schema, config |
+| Specific mechanics, described in our own words | Their **UI layouts**, art, assets, sounds |
+| Their balance values and tuning numbers | Their **text**, names, **terminology**, branding |
+| Progression shapes, curves, thresholds | Any file copied from their installations |
+
+The principle: **mechanics and numbers may be learned; expression may not be taken.** This is also the
+distinction the law draws — game mechanics are generally not protectable, their expression is — so the
+narrowed NG-8 sits at the legal line rather than inside it, where it previously sat.
+
+**Consequences.**
+
+- **D26-a — `PROJECT_VISION.md` §7's public claim becomes false and must be corrected.** It currently states
+  that no third-party "exact mechanics, balance values" are used and that inspiration is limited to genre
+  principles. That is now untrue and is amended in the same commit. Per the discipline established under
+  ADR-0014, a public document is never left asserting something the project has decided against.
+- **D26-b — AC-8 is affected.** It requires `PROJECT_VISION.md` to "restate NG-8/NG-9"; it now restates the
+  *narrowed* NG-8.
+- **⚠ D26-c — R-1 loses part of its answer, and this is the real cost.** Risk R-1 is that distinctiveness
+  must come from our systems because the content is stock. Studying three servers' mechanics makes
+  convergence on their solutions the path of least resistance. **Mitigation: every borrowed mechanic must be
+  recorded as such in its ADR**, so the design record shows plainly how much of the system is ours. If that
+  list grows long, R-1 has materialised and `PROJECT_VISION.md` §3 exists to force the question.
+- **D26-d — extraction is a tooling task with a licence question of its own.** `MPQExtractor`
+  (github.com/Kanma/MPQExtractor) was nominated. Its own licence governs its use, and building it is a build
+  step — `AGENTS.md` forbids building unless explicitly asked, so it is authorised by this decision and
+  nothing wider. Extracted content is **working material only**: it is studied and discarded, never
+  committed, and `.gitignore` must cover wherever it lands.
+- **D26-e — extracted material must not reach the public fork.** Under ADR-0005 the fork is permanent and
+  attributable. Third-party extracted content in it would be both an NG-8 breach and a public one. The
+  extraction directory belongs outside the repository, alongside the wiki clone and the private store.
+- `[A]` **D26-f — one legitimately reusable component may already be here.** Eclipse ships
+  `AwesomeWotlkLib.dll`, which appears to be the open-source `awesome_wotlk` client library. If so it is
+  licensed for reuse, unlike anything else in these installations, and is directly relevant to ADR-0013's
+  AddOn. Its provenance and licence must be verified before any use.
+
+**Cost to reverse.** Low as policy, high in practice. Once a mechanic has informed a decision, the influence
+cannot be unlearned, and the public originality claim has already been weakened in the meantime.
 
 ---
 
