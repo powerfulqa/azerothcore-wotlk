@@ -92,7 +92,9 @@ designed until V-1 is measured (Phase 7).
   Visibility to the player is `[O]` Q6.
 - The player receives a small **viable** starting kit (P-2). A dead starting kit is a defect (X-1).
 - The player may declare **optional stake modifiers** — hardcore, or challenge conditions — which are
-  visible for the life's duration and **immutable once chosen** (P-12).
+  visible for the life's duration and **immutable once chosen** (P-12). `[Amended D-030]` The **difficulty
+  tier** is *not* one of these: it is a modifier layer over the world, unlocked by content and switchable
+  while rested at an inn or capital. Only the death-ends-life stake is immutable.
 - `[P]` Persistent unlocks apply here: better starting *options*, wider drafts, rerolls, curated pools.
   This is where "agency before power" (Pillar 3) is most visible to the player.
 

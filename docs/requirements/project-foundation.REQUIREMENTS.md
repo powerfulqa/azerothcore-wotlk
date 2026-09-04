@@ -205,7 +205,9 @@ ends; account-scoped progression persists and compounds across lives, favouring 
 
 - **P-11** Prestige is a deliberate, confirmed action at 60, with the consequences shown before commitment.
 - **P-12** Optional stake modifiers are declared at life start, visible for the life's duration, and
-  immutable once chosen.
+  immutable once chosen. **Amended by ADR-0030:** this covers the *death-ends-life* stake only. The
+  **difficulty tier** is a separate, selectable modifier layer over the world — unlocked by completing
+  content, and switchable while rested at an inn or capital, out of combat.
 - **P-13** Persistent rewards favour **agency**: better starting options, wider drafts, curated pools,
   rerolls, build slots, controlled progression modifiers. Any *raw power* reward requires caps, pacing,
   diminishing returns and telemetry before it ships.
@@ -468,6 +470,10 @@ Ordered by how much each constrains everything downstream.
   (X-15), which is what stops deliberate death beating prestige. `[V]` **The stock `characters.totaltime`
   cannot serve the time input**: `PlayerUpdates.cpp:117-119` accumulates it as `+= elapsed` with no activity
   gate, so it is logged-in time including AFK. An active-time counter is module work (D29-d).
+- **Q30 (open)** — **Mixed-tier grouping** (D30-f). ADR-0030 makes the difficulty tier a per-character
+  choice, and ADR-0002 sets a three-player group baseline, so a group spanning tiers is a common case rather
+  than an edge one. Does the highest tier apply, the lowest, the leader's, or is mixed-tier grouping blocked?
+  Each answer creates a different social pressure.
 - **Q9** — **Disconnect/server-fault deaths in staked lives** (D2-c): forgiven, appealed, or final?
 - **Q10** — **Planning-doc location**: keep `.claude/plans/` per your instruction and amend `AGENTS.md`, or
   switch to `.agents/plans/` per the repo's existing convention? Both are gitignored.

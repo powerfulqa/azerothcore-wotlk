@@ -43,6 +43,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0027 | The draft carries three tools: reroll, hold and remove | **Accepted** | 2026-09-05 |
 | 0028 | Two layers, one currency, and every sink is agency | **Accepted** | 2026-09-05 |
 | 0029 | Currency is escrowed during a life and banked at life end, scaled by what the life achieved | **Accepted** | 2026-09-05 |
+| 0030 | Difficulty is a selectable modifier layer over the world, unlocked by content, switchable at rest | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -95,6 +96,8 @@ same character. Three models were considered: voluntary prestige only; death end
 - The default life ends only when the player *chooses* to prestige.
 - Optional **stake modifiers** (hardcore, challenge conditions) are declared at life start, visible for the
   life's duration, and immutable once chosen. They grant additional persistent reward proportionate to risk.
+  **Partly amended by ADR-0030:** the *scaling* dial is now a selectable tier switchable at rest, not an
+  immutable declaration. The *death-ends-life* stake remains an immutable life-start choice.
 
 **Rationale.** A death-ends-life default directly contradicts both the 3-player raid endgame and repeated
 solo raid attempts, since both require surviving failure. Voluntary prestige alone leaves the roguelite loop
@@ -1505,6 +1508,77 @@ and the active-time counter are schema and module work, and the weights will hav
 
 ---
 
+## ADR-0030 — Difficulty is a selectable modifier layer over the world, unlocked by content and switchable at rest
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Amends:** ADR-0002 (stake immutability)
+**Borrowed mechanic — logged per D26-c**
+
+**Context.** ADR-0002 made stake modifiers "declared at life start, visible for the life's duration, and
+**immutable once chosen**". The comparative survey found a materially different model in the reference
+roguelite, which the owner has chosen to adopt: difficulty as a **layer over the world**, each layer carrying
+its own scaling and difficulty curve.
+
+**What the reference model actually is** (verified by reading, not inferred from names): discrete tiers —
+Normal plus five graded steps — each **unlocked by defeating specific endgame bosses**, **switchable only
+while rested at an inn or capital, out of combat**, paying **more loot and experience**, and implemented as
+**auras and modifiers applied to creatures**.
+
+**Decision.** Difficulty becomes a **selectable tier**, not a life-start declaration:
+
+1. Each tier is a **modifier layer over the existing world** — it carries its own scaling and difficulty
+   curve rather than changing content.
+2. Tiers are **unlocked by completing content**, which makes the whole system a Pillar 1 mechanism.
+3. A tier may be **changed only at rest** — out of combat, in an inn or a capital — never reactively.
+4. A higher tier raises the **rate** at which currency accrues, per ADR-0029.
+
+**This amends ADR-0002.** Immutability is replaced by at-rest switchability. What immutability bought was
+tension; what it cost was approachability — a player who over-commits is stuck for a whole life of six hours
+or more, which makes a system ADR-0002 insists is *optional* feel like a trap.
+
+**Why switchable is safe here, when it would not have been before.** `[V]` ADR-0029 banks currency by
+**accrual during the life**, not as a lump sum at the end. So a player who drops difficulty for a hard patch
+simply accrues more slowly from that moment; they cannot retroactively earn at a rate they were not on. The
+model is **self-balancing**, and the at-rest gate stops tactical mid-encounter switching. Under a
+lump-sum-at-end economy this would have been straightforwardly exploitable — the two decisions only work
+together.
+
+**Consequences.**
+
+- `[V]` **D30-a — the layer is implementable module-side.** `AllCreatureScript` provides
+  `OnCreatureAddWorld`, `OnCreatureSelectLevel` and `OnBeforeCreatureSelectLevel` — the last taking
+  `uint8& level` by reference — plus `OnAllCreatureUpdate`
+  (`src/server/game/Scripting/ScriptDefines/AllCreatureScript.h:30-43`). A module can rewrite creature level
+  and apply modifier auras at spawn with **no core patch**, keeping D10-e intact.
+- **⚠ D30-b — creatures are shared, so the open world cannot be layered this way.** Two players standing
+  together on different tiers cannot both see correct creature stats. **Instanced content is unaffected**
+  (dungeons and raids are per-group). The open world requires **player-side** modifiers instead — damage
+  taken and dealt — which lands on `UnitScript::OnDamage`, precisely the high-frequency path **T-7** exists
+  to protect and that **ADR-0024** already made unbounded by leaving augments uncapped. **These two decisions
+  compound on the same hot path**, which raises the priority of **Q27**'s runtime trigger ceiling from
+  "blocks Phase 5" to "blocks two systems".
+- **⚠ D30-c — the unlock gates cannot be copied.** The reference gates are WotLK 25-player raid bosses. Our
+  level cap is 60 and our group baseline is **three players**, so the gates must be level-60-appropriate and
+  reachable by a small group. **V-1** — which level-60 encounters exist and at what tuning — is still
+  unverified, so the gate list cannot be set before Phase 1 measures it. The *mechanism* is adopted; the
+  *thresholds* are not.
+- **D30-d — difficulty-scumming is bounded, not eliminated.** Registered as **X-17**. The at-rest gate means
+  a player must leave an encounter, travel to an inn and return, which is prohibitive mid-dungeon but
+  possible in the open world. Accrual-rate balancing (above) means the remaining behaviour costs the player
+  reward rather than gaining them any, so the incentive points the right way.
+- **D30-e — D2-a still holds, and now more cleanly.** Higher tiers pay *more of the same currency*
+  (ADR-0028), never exclusive unlocks, so no persistent reward is reachable only through a raised tier.
+- **D30-f — mixed-tier grouping needs a stated rule.** Three players at different tiers in one instance is
+  ambiguous: highest, lowest, leader's, or blocked entirely. ADR-0002's three-player baseline makes this a
+  common case rather than an edge case. Unresolved — **Q30**.
+- **D30-g — ADR-0002's hardcore path is unaffected.** Death-ends-life stakes remain a separate, genuinely
+  immutable declaration; this decision governs the *scaling* dial, not the death rule. The two must not be
+  conflated in later documents.
+
+**Cost to reverse.** Medium. Tier definitions are data and the switching rule is a check, but unlock gates
+tied to content and an economy priced against tier rates would both need revisiting.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -1519,7 +1593,8 @@ custom DBC.
 | Q | Decision | Blocks | Cost to reverse |
 |---|---|---|---|
 | Q24 | Acceptable data-loss window, given D2-b requires staked deaths be auditable (D18-e) | Backup frequency; hardcore dispute handling | Medium |
-| **Q27** | The technical trigger budget: what is the hard runtime ceiling on augment combat hooks, and how is it enforced? (D24-a) | Blocks Phase 5; T-7 is now unbounded by design | **High** |
+| **Q27** | The technical trigger budget: the hard runtime ceiling on the combat hot path (D24-a) — now carrying **both** uncapped augments and open-world difficulty modifiers (D30-b) | Blocks Phase 5 **and** the difficulty layer | **High** |
+| **Q30** | Mixed-tier grouping: whose difficulty applies when a 3-player group spans tiers? (D30-f) | Common case, not an edge case, under ADR-0002's group baseline | **High** |
 | Q4 | Module hosting: separate repo vs vendored in-tree | Phase 1 setup | Medium |
 | Q5 | Audience scale and realm openness | Anti-exploit budget, telemetry investment | Medium |
 | Q7 | Nerf policy for already-acquired powers | X-11 enforcement credibility | Medium |

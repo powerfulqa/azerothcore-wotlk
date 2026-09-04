@@ -118,6 +118,7 @@ one negative test** in `e2e/suites/` before the system that could cause it ships
 | X-14 | Loadout swapping to trivialise encounters — slotting tank tools for one fight, then swapping back | Replacement occurs **only at acquisition**; there is no free re-slotting (D23-a). Any future convenience that relaxes this reopens the exploit |
 | X-15 | Deliberate death being more profitable than prestiging | Both life-end paths use the **identical** payout formula (D29-c); the stake multiplies earnings *during* the life and the ending itself pays no bonus. Any future end-of-life bonus reopens this |
 | X-16 | Inflating the life-end payout by repetition or idling | Dungeon and raid credit is **per distinct instance per life**, never per run (D29-e); the time input is **active** time, not logged-in time (D29-d) |
+| X-17 | Difficulty-scumming — lowering the tier for dangerous content and raising it for safe farming | Tier changes only while rested, out of combat, at an inn or capital (D30-d); and because ADR-0029 accrues reward at the rate in force, lowering the tier *costs* reward rather than gaining any |
 
 **X-3 and X-4 are now load-bearing, not merely architectural.** ADR-0024 left the augment layer uncapped,
 so the interaction surface grows combinatorially and these guards are the primary defence rather than a
