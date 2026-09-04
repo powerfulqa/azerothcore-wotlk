@@ -32,6 +32,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0016 | The private decision store is a local repository with an encrypted offline backup | **Accepted** | 2026-09-05 |
 | 0017 | Live e2e runs against a full local Docker stack on the development machine | **Accepted** | 2026-09-05 |
 | 0018 | Backups are encrypted logical dumps of the irreplaceable databases, with an automated restore test | **Accepted** | 2026-09-05 |
+| 0019 | The chassis is a starting nudge that converges by level 60 | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -826,31 +827,95 @@ excluded because it is reproducible from version control.
 
 ---
 
+## ADR-0019 — The chassis is a starting nudge that converges by level 60
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q11 and Q6 (merged)
+
+**Context.** Q11 asked whether prestige may change a vessel's chassis, on the reasoning that a vessel locked
+to one chassis would be locked out of most of the game for every life it ever ran. ADR-0012 (every chassis
+carries every resource) and ADR-0013 (all resources displayed) removed the grounds for that concern, so the
+question was re-examined before being asked rather than answered on stale reasoning.
+
+**What was verified.**
+- `[V]` **Gear proficiency is skill-based, not class-locked.** `PlayerStorage.cpp:2330-2341` grants an
+  *allowance* to paladin/warrior for plate and hunter/shaman for mail, but the actual gate is
+  `if (!allowEquip && GetSkillValue(itemSkill) == 0) return EQUIP_ERR_NO_REQUIRED_PROFICIENCY`. Any chassis
+  holding the relevant skill can equip the item.
+- `[V]` Those skills are ours to grant: `playercreateinfo_skills` is a world DB table keyed by
+  `raceMask`/`classMask`, and `SPELL_EFFECT_PROFICIENCY` (`src/server/game/Spells/SpellEffects.cpp:2319`)
+  grants proficiency by spell. **No core patch.**
+- `[V]` `player_class_stats` is keyed `(Class, Level)` and carries `BaseHP`, `BaseMana`, `Strength`,
+  `Agility`, `Stamina`, `Intellect`, `Spirit` (`data/sql/base/db_world/player_class_stats.sql:23-34`), so
+  curves that differ early and converge later are **pure data**, not code.
+
+**What the chassis still determines**, after ADR-0012 and ADR-0013:
+
+| Determines | Nature |
+|---|---|
+| Base stat curve | World DB data we author |
+| Armour/weapon proficiency | Skill-based and grantable |
+| Model and armour animation | Cosmetic |
+| ~~Ability pool~~ | Nothing — ADR-0012 |
+| ~~Displayed resource~~ | Nothing — ADR-0013 |
+
+**Decision.** The chassis is a **starting nudge**. Stat curves are differentiated at low level and
+**converge by level 60**. The early game therefore carries real texture and a choice with weight; the endgame
+build is decided by the player's per-level choices (ADR-0009), not by their origin.
+
+**Consequences.**
+
+- **D19-a — Q11 is answered: prestige may change the chassis freely.** With the chassis restricting nothing
+  and converging by 60, changing it is low-stakes. This also retires the slot-pressure concern recorded
+  against ADR-0007, since a player wanting a different chassis no longer needs a second vessel.
+- **D19-b — Q6 is answered: "a light identity that becomes irrelevant."** The chassis cannot be *hidden* —
+  early stat differences are visible and consequential — but it must never be presented as a class, and by
+  60 it is genuinely inert. Player-facing language should describe an origin, not a profession.
+- **D19-c — convergence needs a shape and a completion level**, and both are balance parameters with no
+  default. It also needs instrumentation: if the early nudge does not measurably influence build choice, it
+  is decorative complexity and should be deleted rather than tuned. That is a Pillar 5 obligation, so the
+  metric must exist before the curves ship.
+- `[O]` **D19-d — proficiency is now an explicit design decision rather than an inherited default.** Since
+  proficiency is grantable, we must choose: do all chassis receive all armour and weapon proficiencies at
+  life start, making armour type purely cosmetic? Or is proficiency itself an **acquisition** — "unlock
+  plate" as a draftable choice — which would make gear a genuine axis of the build rather than a given? This
+  is **Q25**, and it is more interesting than it first appears: it could give the draft a dimension that is
+  neither ability, talent, upgrade nor augment.
+- **D19-e — `player_class_stats` is now balance-critical in full.** D12 already made `BaseMana` a tuning
+  value for three classes; this extends that to every column of the table for every chassis.
+- Convergence interacts with P-8's ~6h first-life pacing and the reshaped XP curve
+  (`CORE_GAME_LOOP.md` §5.2). No conflict, but the curves should be authored together, not separately.
+
+**Cost to reverse.** Low. The curves are data, and convergence can be flattened to option A (pure cosmetics)
+or steepened to option B (a full-life identity) by editing one table — until a catalogue and balance pass
+have been built on top of a particular shape.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
 Full text: `requirements/project-foundation.REQUIREMENTS.md` §14.
 
 **Answered:** Q1 → **ADR-0007**, Q2 → **ADR-0008**, cadence → **ADR-0009**, Q3 → **ADR-0010**
-(all 2026-09-04). Between them they raised Q11–Q20. ADR-0011 amended P-1 and was superseded the same day by ADR-0012;
-ADR-0013 amends **T-10**, which now permits a required AddOn but still forbids MPQ patches and custom DBC.
+(all 2026-09-04). Between them they raised Q11–Q25; **Q6 and Q11 were merged and answered together by
+ADR-0019**, and Q18 was dissolved rather than answered. ADR-0011 amended P-1 and was superseded the same day
+by ADR-0012. ADR-0013 amends **T-10**, which now permits a required AddOn but still forbids MPQ patches and
+custom DBC.
 
 | Q | Decision | Blocks | Cost to reverse |
 |---|---|---|---|
+| **Q25** | Is armour/weapon proficiency granted to all chassis, or is it itself an acquisition? (D19-d) | Whether gear is a build axis; draft dimensions | **High** |
 | Q24 | Acceptable data-loss window, given D2-b requires staked deaths be auditable (D18-e) | Backup frequency; hardcore dispute handling | Medium |
-| **Q11** | May prestige change the vessel's chassis? (promoted by D11-d — chassis now fixes the ability pool) | Whether a vessel is locked out of most content for every life | **High** |
 | Q15 | Offer composition: one option of each type, or N from a combined pool? (wild card and per-level) | Feel of every choice; draft generator | Medium |
 | Q16 | Upgrade semantics: rank advance, or swap to a stronger spell? Is depth capped? (D9-a) | Phase 4; acquisition schema | Medium |
 | Q13 | Protected-category taxonomy: which role-functions are guaranteed an offer, and by what level (D8-d) | Phase 4 draft system; P-5 role coverage | Medium |
 | Q14 | Decline semantics: may a draft be refused outright, and do unpicked powers return to the pool later in the life? | Feel of every draft; guarantee scheduling | Medium |
 | Q4 | Module hosting: separate repo vs vendored in-tree | Phase 1 setup | Medium |
 | Q5 | Audience scale and realm openness | Anti-exploit budget, telemetry investment | Medium |
-| Q6 | Chassis visibility to the player (see also Q11) | Player-facing framing | Low |
 | Q7 | Nerf policy for already-acquired powers | X-11 enforcement credibility | Medium |
 | Q8 | Persistent currency shape — and which anchor each unlock hangs from (D7 three-anchor rule) | Phase 2/3 schema | High |
 | Q9 | Disconnect / server-fault deaths in staked lives | Player trust; D2-c | Medium |
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** Q11, then Q24. Note ADR-0012 defused much of what made Q11 urgent — re-read its
-cost-to-reverse before spending a question on it.
+**Next:** Q25 — raised by ADR-0019 and potentially a new draft dimension. Then Q13/Q14, then Q24.

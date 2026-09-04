@@ -448,8 +448,9 @@ Ordered by how much each constrains everything downstream.
   practice) or vendored in-tree via `!modules/mod-<name>` (single repo, simpler solo)?
 - **Q5** — **Levelling path**: is the full classic 1–60 world open, or curated/gated to guarantee pacing and
   coherence (V-3)?
-- **Q6** — **Chassis visibility** (P-1): fully hidden, acknowledged as a starting origin, or a light
-  identity that becomes irrelevant?
+- **Q6 — ANSWERED 2026-09-05 → ADR-0019.** "A light identity that becomes irrelevant." It cannot be hidden,
+  because early stat differences are visible and consequential, but it must never be presented as a class
+  and by level 60 it is inert. Player-facing language describes an origin, not a profession.
 - **Q7** — **Nerf policy** (X-11 gap): what happens to a player who already owns a power we nerf — retroactive,
   grandfathered, or refunded?
 - **Q8** — **Persistent currency shape**: one currency, several, or direct unlock-on-achievement with no
@@ -457,10 +458,11 @@ Ordered by how much each constrains everything downstream.
 - **Q9** — **Disconnect/server-fault deaths in staked lives** (D2-c): forgiven, appealed, or final?
 - **Q10** — **Planning-doc location**: keep `.claude/plans/` per your instruction and amend `AGENTS.md`, or
   switch to `.agents/plans/` per the repo's existing convention? Both are gitignored.
-- **Q11** — **May prestige change the vessel's chassis?** Raised by ADR-0007. A persistent vessel fixes its
-  chassis for its entire existence unless prestige may reroll or re-choose it. If it cannot change, a player
-  wanting a different chassis needs a second vessel — which reintroduces slot pressure against the 10-slot
-  client cap. Bears directly on how classless the game feels *across* lives, not just within one.
+- **Q11 — ANSWERED 2026-09-05 → ADR-0019**, together with Q6. **Prestige may change the chassis freely.**
+  The premise had dissolved: ADR-0012 and ADR-0013 left the chassis restricting neither the ability pool nor
+  the displayed resource, and `[V]` gear proficiency turns out to be skill-based rather than class-locked
+  (`PlayerStorage.cpp:2330-2341`), so nothing locks a vessel out of content. The chassis is now a **starting
+  nudge** whose stat curves converge by level 60.
 - **Q12** — **Vessel deletion vs life records** (D7-c). If life records back account-level unlocks, deleting a
   vessel must not orphan or destroy them. Are life records reparented to the account, retained orphaned, or is
   vessel deletion restricted?
@@ -503,6 +505,12 @@ Ordered by how much each constrains everything downstream.
   auditable, so a restore that rewinds hours could resurrect a character the realm recorded as dead, or
   destroy the evidence of a legitimate one. Backup frequency must follow from what a hardcore player would
   accept losing, not from convenience.
+- **Q25 (next)** — **Is proficiency granted, or acquired?** (D19-d) `[V]` Armour and weapon proficiency is
+  skill-based and grantable — via `playercreateinfo_skills` (world DB) or `SPELL_EFFECT_PROFICIENCY`
+  (`SpellEffects.cpp:2319`) — so it is now a choice rather than an inherited default. Either every chassis
+  receives every proficiency at life start, making armour type purely cosmetic; or proficiency is itself an
+  **acquisition** the player drafts, which would make gear a real axis of the build and add a draft dimension
+  that is neither ability, talent, upgrade nor augment.
 
 ---
 
