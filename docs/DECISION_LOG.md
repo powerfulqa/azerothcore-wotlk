@@ -40,6 +40,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0024 | The augment layer is uncapped; achievements grant augments freely | **Accepted** | 2026-09-05 |
 | 0025 | Upgrades advance authored rank chains; depth capped by chain length; dropped rank remembered | **Accepted** | 2026-09-05 |
 | 0026 | NG-8 narrowed: mechanics and balance values may be studied; expression may not be used | **Accepted** | 2026-09-05 |
+| 0027 | The draft carries three tools: reroll, hold and remove | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -1317,6 +1318,65 @@ narrowed NG-8 sits at the legal line rather than inside it, where it previously 
 
 **Cost to reverse.** Low as policy, high in practice. Once a mechanic has informed a decision, the influence
 cannot be unlearned, and the public originality claim has already been weakened in the meantime.
+
+---
+
+## ADR-0027 — The draft carries three tools: reroll, hold and remove
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Extends:** ADR-0008 · **Borrowed mechanic — see D26-c**
+
+**Context.** ADR-0008 gave the draft a single tool: an earned reroll budget. The comparative survey
+authorised by ADR-0026 found that one reference roguelite runs **three** counted, run-scoped tools on its
+draft, and that they answer genuinely different questions. This record adopts that structure. **Per D26-c it
+is logged explicitly as a borrowed mechanic**, so the design record shows how much of the system is ours.
+
+**Decision.** Each life carries three counted tools, spent against draft offers:
+
+| Tool | Effect | Answers |
+|---|---|---|
+| **Reroll** | Replaces the **whole offer** with a fresh draw | "not these three" |
+| **Hold** | Carries **one option** forward into the next offer | "I want this, but not now" |
+| **Remove** | Takes an option **out of this life's eligible pool** for good | "never show me this again" |
+
+All three are **life-scoped in effect** and, following D8-c, **account-earned and life-spent** — the same
+Pillar 3 shape as the existing reroll budget. Player-facing names are ours to choose; NG-8 still forbids
+taking another server's terminology, so these are working labels only.
+
+**Consequences.**
+
+- **D27-a — "remove" plugs straight into the machinery D22-c made central.** ADR-0022 draws offers from
+  everything *currently eligible*, and remove is simply a **player-authored eligibility rule**. It needs no
+  new mechanism, only a life-scoped exclusion set — which is notable, because ADR-0023 rejected an exclusion
+  set for *declined* options on the grounds that it would starve late offers. The difference is that this one
+  is **deliberate and budgeted**, so the player owns the consequence.
+- **D27-b — remove is a partial player-side answer to H-8.** D22-a's residual risk is early-life offers
+  flooding with proficiency while the upgrade pool is empty. A player suffering that can now remove the
+  proficiencies they do not want, improving *every* subsequent offer rather than just the current one. This
+  does not retire H-8 — the metric still stands — but it means the failure has a player-accessible remedy
+  before we reach for weights.
+- **D27-c — hold is the natural partner to finite slots.** Under ADR-0023 a full-slot player facing a good
+  option must drop something *now* or lose it. Hold converts that into "keep it on the table while I decide",
+  which removes the worst of D23-b's feels-bad without weakening the slot constraint itself.
+- **⚠ D27-d — the remove budget is a pool-determinism dial, not a convenience setting.** With enough
+  removes a player can carve the eligible pool down to a chosen category and make their build deterministic,
+  which would drain the run-to-run variance the draft exists to create. **The budget size is therefore a
+  balance parameter with a hard design ceiling**, not a generosity knob, and it needs its own metric before
+  it ships.
+- **D27-e — offer state grows, and D8-a still governs it.** A held option and the life's removed set are both
+  persisted state on the life row (D8-b). D8-a's rule stands: generated once, persisted transactionally, or
+  relogging becomes free manipulation. **X-12 now covers three tools rather than one.**
+- **D27-f — D7-a's reset manifest gains the removed set and any held option.** Both are life-scoped, so both
+  must be cleared. A vessel carrying a removed set into its next life would silently narrow that life's pool.
+- **Considered and not adopted: restoring rerolls on death.** The reference server restores them when the
+  player dies, which implies death is a meaningful checkpoint in its run. Under ADR-0002 a default life's
+  death is ordinary and carries no life consequence, so the mechanic has nothing to hang on. Recorded so the
+  omission is visible as a decision rather than an oversight.
+- `[O]` **D27-g — budget sizes and their growth curve are undefined**, and couple to **Q8**, since these
+  budgets are among the things the persistent economy buys. Three separate budgets also multiply what Q8 has
+  to price.
+
+**Cost to reverse.** Low-to-medium. Hold and remove are additive to a generator ADR-0008 already requires,
+but the removed set is life-scoped persistent state and therefore schema-level from the first migration.
 
 ---
 

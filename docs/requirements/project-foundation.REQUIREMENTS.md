@@ -175,7 +175,9 @@ ends; account-scoped progression persists and compounds across lives, favouring 
 - **P-3 Acquisition through levelling.** Curated cross-class **abilities** (active) and **talents**
   (passive) are acquired as the player levels. The acquisition model is settled by **ADR-0008**: a
   choice-of-N draft (N starts at 3, tunable) in which protected categories guarantee a role-critical
-  function is *offered* — never forced — and an account-earned reroll budget is spent within the life.
+  function is *offered* — never forced — and account-earned budgets are spent within the life. **ADR-0027**
+  makes those budgets three: **reroll** the whole offer, **hold** one option into the next offer, **remove**
+  an option from this life's pool for good.
   **ADR-0009** sets its cadence: a wild card selection at life start, then at every level a choice between a
   new ability, an **upgrade** to one already held, or a talent. The upgrade axis is depth, not a fourth
   power layer, and it competes for the same slot as breadth.

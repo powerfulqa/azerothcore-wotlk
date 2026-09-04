@@ -45,7 +45,8 @@ next life wider and faster.
 **Foundation documentation only.** No code, no schema, no module, and no build has been
 run. Every design document is marked *Proposed* except the accepted ADRs.
 
-Twenty-three decisions are settled (one superseded the same day):
+**Twenty-four** decisions are accepted (ADR-0011 was superseded the same day; ADR-0003 and ADR-0004
+remain *Proposed*):
 
 | ADR | In one line |
 |---|---|
@@ -72,6 +73,8 @@ Twenty-three decisions are settled (one superseded the same day):
 | **0023** | **Build slots are finite**, replacement happens at acquisition, declining keeps your set (answers Q14) |
 | **0024** | The **augment layer is uncapped**; PvE achievements grant augments freely — serves Pillar 1, strains Pillar 4 |
 | **0025** | Upgrades advance **authored `spell_ranks` chains** that may transform within a role; dropped rank is remembered |
+| 0026 | NG-8 narrowed: **mechanics and balance values may be studied**; expression may not be used |
+| **0027** | The draft carries **three tools** — reroll, hold, remove — extending ADR-0008's single reroll budget |
 
 Those answers raised ten further questions (Q11–Q20), one of which (Q18) was dissolved
 rather than answered. Fourteen remain open and are deliberately unanswered rather than

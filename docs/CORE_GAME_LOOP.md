@@ -106,6 +106,11 @@ Levelling 1→60 through the classic world. Three power layers accumulate, and t
 | **Talents** | passive modifiers, specialisation | through levelling, by guaranteed-offer draft (D-008) |
 | **Augments** | build-warping interactions — resource, cooldown, trigger, area, scaling transformation, defensive conversion, risk/reward | level milestones, and potentially defined PvE achievements |
 
+**Draft tools (D-027).** A life carries three counted, account-earned tools: **reroll** replaces the whole
+offer, **hold** carries one option into the next offer, **remove** takes an option out of this life's
+eligible pool for good. Remove is a player-authored eligibility rule, so it improves every later offer
+rather than just the current one — and its budget is a *variance* dial, not a convenience one (D27-d).
+
 **Cadence (D-009).** A life opens with a **wild card** ability or talent selection. Then **at every level**
 the player chooses one of three: a new ability, an **upgrade** to an ability they already hold, or a talent.
 The upgrade is a fourth axis — *depth* rather than a fourth power layer — and it competes for the same slot

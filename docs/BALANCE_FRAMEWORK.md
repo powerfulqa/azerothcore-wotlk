@@ -113,7 +113,7 @@ one negative test** in `e2e/suites/` before the system that could cause it ships
 | X-9 | Reset abuse | Life-end and prestige rules; prestige eligibility constraints; M-7 monitoring |
 | X-10 | Trading, boosting and economy exploits | Persistent progression is account-scoped and non-tradeable; group-acquisition rules; M-9 monitoring |
 | X-11 | A single mandatory best build | Role coverage (P-5); outlier detection via M-2…M-5; pick-rate ceiling SM-4; a stated nerf policy |
-| X-12 | Draft rerolling by relog or session manipulation | Offers generated once and persisted transactionally with the acquisition point (D8-a); reroll spend recorded in the life row |
+| X-12 | Draft manipulation by relog or session manipulation — **all three tools** of ADR-0027 | Offers generated once and persisted transactionally with the acquisition point (D8-a); reroll, hold and remove spend all recorded in the life row (D27-e) |
 | X-13 | A drafted proficiency whose gear never drops — a wasted slot, not an exploit but the same felt cost | Measure drop and quest-reward distribution by armour/weapon type and level band (V-3) before finalising the draft pool; keep the baseline set wide enough that no life is stranded (D20-c) |
 | X-14 | Loadout swapping to trivialise encounters — slotting tank tools for one fight, then swapping back | Replacement occurs **only at acquisition**; there is no free re-slotting (D23-a). Any future convenience that relaxes this reopens the exploit |
 
@@ -147,6 +147,7 @@ the phase that can test it completes.
 | H-7 | A 3-player tank/healer/DPS target is achievable without per-encounter bespoke tuning | Encounters requiring individual adaptation to be completable | Phase 7 |
 | H-8 | An unweighted combined-pool draw does not starve early lives of abilities, because rerolls and injected guarantees absorb bad offers (D22-a) | M-2/M-12 showing levels 2–8 offers skewed to proficiency, or early-life abandonment correlating with low early ability count | Phase 4 |
 | H-9 | An uncapped augment layer stays explainable, because the ADR-0013 AddOn surfaces augment state and active interactions (D24-c) | Players unable to state why their build works; SM-2 diverging from build complexity; support load about unexplained behaviour | Phase 5 |
+| H-10 | A budgeted **remove** does not let players make their builds deterministic by carving the pool down to one category (D27-d) | Build diversity falling as remove spend rises; M-5 outliers clustering among heavy remove users | Phase 4 |
 
 H-7 is the most optimistic entry here and should be tested early rather than assumed through to launch.
 
