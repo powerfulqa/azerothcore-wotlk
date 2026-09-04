@@ -45,6 +45,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0029 | Currency is escrowed during a life and banked at life end, scaled by what the life achieved | **Accepted** | 2026-09-05 |
 | 0030 | Difficulty is a selectable modifier layer over the world, unlocked by content, switchable at rest | **Accepted** | 2026-09-05 |
 | 0031 | One indexed combat hook, and only trigger-bearing augments are capped | **Accepted** | 2026-09-05 |
+| 0032 | A group plays at the lowest difficulty tier present | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -1642,6 +1643,61 @@ registration pattern, once adopted across a catalogue, would be expensive to unw
 
 ---
 
+## ADR-0032 — A group plays at the lowest difficulty tier present
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q30
+
+**Context.** ADR-0030 made the difficulty tier a per-character choice and ADR-0002 sets a three-player group
+baseline, so groups spanning tiers are a common case. `[V]` ADR-0031's aura implementation (D31-b) meant
+mixed tiers were technically *free* — `SPELL_AURA_MOD_DAMAGE_PERCENT_DONE` and `..._TAKEN` are per-player, so
+each member could simply experience their own tier. The problem was therefore not consent but **reward**:
+ADR-0029 scales the payout by distinct dungeons and raids completed, achievements, level and active time, and
+**not by contribution** — so bringing a lower-tier player to do the killing while collecting content credit
+at a higher rate would have been optimal.
+
+**Decision.** **A group plays at the lowest difficulty tier present among its members.** Danger and reward
+therefore stay aligned for everyone: what you face is what you earn, always.
+
+**Why this beats the alternative that was recommended.** A split model — own tier for danger, group's lowest
+for reward — removes the carry incentive too, but it asks a player to face one tier's danger while banking
+another tier's reward. That is two systems where this is one, and **Pillar 4's test is whether a player can
+explain it in a sentence**. "The group plays at the lowest tier" passes; "you take Hardcore V damage but earn
+Normal currency" does not. It also needs no separate reward cap, because the effective tier *is* the played
+tier and ADR-0029 simply reads it.
+
+**Consequences.**
+
+- **⚠ D32-a — this reopens X-17 through the group mechanism, and must be closed explicitly.** ADR-0030
+  restricts tier changes to being rested, out of combat, at an inn or capital, precisely to prevent
+  difficulty-scumming. A group-driven change bypasses that entirely: invite a Normal-tier player mid-dungeon
+  and the whole group is instantly downgraded. **Mitigation: the effective group tier is re-evaluated only
+  while no member is in combat.** `[V]` Both halves are available module-side — `GroupScript::OnAddMember`,
+  `OnRemoveMember`, `OnDisband`, `OnCreate` (`src/server/game/Scripting/ScriptDefines/GroupScript.h:48-64`)
+  and `Unit::IsInCombat()` (`src/server/game/Entities/Unit/Unit.h:936`). Joining mid-fight changes nothing
+  until the fight ends.
+- **D32-b — the committed player pays for grouping, and that is the accepted cost.** A player at a high tier
+  who groups with a less-committed friend is downgraded in both danger and reward. This is the deliberate
+  trade: carrying becomes impossible, and the price is that grouping across tiers costs the more committed
+  player something.
+- `[O]` **D32-c — the population may fragment by tier, and this needs watching.** With ADR-0002's endgame
+  built on three-player groups, a rule that penalises cross-tier grouping pushes players to group only within
+  their own tier. On a small realm that could leave high-tier players unable to find groups at all — which
+  would make the difficulty system self-limiting. Registered as **H-11**; it interacts directly with **Q5**
+  (audience scale and realm openness), still open.
+- **D32-d — the tier becomes a visible group property.** Players need to see the effective tier before
+  committing to a group, or they will discover the downgrade after travelling to an instance. This is work
+  for the ADR-0013 AddOn, and it is the same P-11 "consequences shown before commitment" obligation that
+  D29-g created for the payout preview.
+- **D32-e — solo play is now the higher-reward path at a given tier.** Since grouping can only lower the
+  effective tier, never raise it, a solo player always plays at their own tier. That tension is worth being
+  aware of against Pillar 1 and the three-player endgame, though ADR-0002 already expects solo raid attempts
+  to be a legitimate playstyle.
+
+**Cost to reverse.** Low. The rule is a single evaluation over group membership; changing it later to a
+split-reward model or to per-player tiers would not touch schema.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -1656,7 +1712,6 @@ custom DBC.
 | Q | Decision | Blocks | Cost to reverse |
 |---|---|---|---|
 | Q24 | Acceptable data-loss window, given D2-b requires staked deaths be auditable (D18-e) | Backup frequency; hardcore dispute handling | Medium |
-| **Q30** | Mixed-tier grouping: whose difficulty applies when a 3-player group spans tiers? (D30-f) | Common case, not an edge case, under ADR-0002's group baseline | **High** |
 | Q4 | Module hosting: separate repo vs vendored in-tree | Phase 1 setup | Medium |
 | Q5 | Audience scale and realm openness | Anti-exploit budget, telemetry investment | Medium |
 | Q7 | Nerf policy for already-acquired powers | X-11 enforcement credibility | Medium |
@@ -1665,4 +1720,4 @@ custom DBC.
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** Q30 (mixed-tier grouping), then Q24, then the gear affix layer, then Q28.
+**Next:** Q24 (data-loss window), then the gear affix layer, then Q5 (now coupled to H-11), then Q28.

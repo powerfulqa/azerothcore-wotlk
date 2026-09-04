@@ -45,7 +45,7 @@ next life wider and faster.
 **Foundation documentation only.** No code, no schema, no module, and no build has been
 run. Every design document is marked *Proposed* except the accepted ADRs.
 
-**Twenty-eight** decisions are accepted (ADR-0011 was superseded the same day; ADR-0003 and ADR-0004
+**Twenty-nine** decisions are accepted (ADR-0011 was superseded the same day; ADR-0003 and ADR-0004
 remain *Proposed*):
 
 | ADR | In one line |
@@ -79,14 +79,15 @@ remain *Proposed*):
 | **0029** | Currency is **escrowed and banked at life end, scaled by what the life achieved** — content, level, active time |
 | **0030** | Difficulty is a **selectable modifier layer over the world** — unlocked by content, switchable at rest (amends ADR-0002) |
 | **0031** | **One indexed combat hook**; only *trigger-bearing* augments are capped, and difficulty runs on player auras (narrows ADR-0024) |
+| **0032** | A group plays at the **lowest difficulty tier present** — danger and reward stay aligned (answers Q30) |
 
 Those answers raised ten further questions (Q11–Q20), one of which (Q18) was dissolved
 rather than answered. Fourteen remain open and are deliberately unanswered rather than
 guessed at.
 
-**Next action:** **Q30** — mixed-tier grouping. ADR-0030 makes the difficulty tier a
-per-character choice and ADR-0002 sets a three-player baseline, so a group spanning tiers is
-a common case. Then **Q24**, the gear affix layer, and **Q28**.
+**Next action:** **Q24** — the acceptable data-loss window, which D2-b's auditable staked
+deaths turn into a design question rather than an ops one. Then the gear affix layer, then
+**Q5** (now coupled to H-11's tier-fragmentation risk), then **Q28**.
 
 ## Conventions in these documents
 

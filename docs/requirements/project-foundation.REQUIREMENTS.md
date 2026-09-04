@@ -470,10 +470,13 @@ Ordered by how much each constrains everything downstream.
   (X-15), which is what stops deliberate death beating prestige. `[V]` **The stock `characters.totaltime`
   cannot serve the time input**: `PlayerUpdates.cpp:117-119` accumulates it as `+= elapsed` with no activity
   gate, so it is logged-in time including AFK. An active-time counter is module work (D29-d).
-- **Q30 (open)** — **Mixed-tier grouping** (D30-f). ADR-0030 makes the difficulty tier a per-character
-  choice, and ADR-0002 sets a three-player group baseline, so a group spanning tiers is a common case rather
-  than an edge one. Does the highest tier apply, the lowest, the leader's, or is mixed-tier grouping blocked?
-  Each answer creates a different social pressure.
+- **Q30 — ANSWERED 2026-09-05 → ADR-0032.** **A group plays at the lowest tier present**, so danger and
+  reward stay aligned for everyone — chosen over a split model on Pillar 4 grounds, since "the group plays at
+  the lowest tier" is one sentence a player can explain. `[V]` Mixed tiers were technically free under
+  ADR-0031's per-player auras; the problem was reward, because ADR-0029's payout ignores contribution and
+  would have made carrying optimal. **⚠ D32-a**: this reopens X-17 via group membership, closed by
+  re-evaluating the effective tier **only while no member is in combat**. **H-11** watches for the population
+  fragmenting by tier, which couples to **Q5**.
 - **Q9** — **Disconnect/server-fault deaths in staked lives** (D2-c): forgiven, appealed, or final?
 - **Q10** — **Planning-doc location**: keep `.claude/plans/` per your instruction and amend `AGENTS.md`, or
   switch to `.agents/plans/` per the repo's existing convention? Both are gitignored.

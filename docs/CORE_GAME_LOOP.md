@@ -108,6 +108,10 @@ Levelling 1→60 through the classic world. Three power layers accumulate, and t
 | **Talents** | passive modifiers, specialisation | through levelling, by guaranteed-offer draft (D-008) |
 | **Augments** | build-warping interactions — resource, cooldown, trigger, area, scaling transformation, defensive conversion, risk/reward | level milestones, and potentially defined PvE achievements |
 
+**Grouping and difficulty (D-032).** A group plays at the **lowest** difficulty tier present among its
+members, so what a player faces is always what they earn. The effective tier is re-evaluated only while no
+member is in combat, which stops a mid-encounter invite being used to downgrade the group (X-17b).
+
 **Banking (D-029).** Currency accrues during a life and is credited to the account **only at life end**,
 scaled by what the life achieved — distinct dungeons and raids completed, achievements earned, level reached,
 and *active* played time. So level 60 is genuinely a home: you live there, run content, grow the bank, and

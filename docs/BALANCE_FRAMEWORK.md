@@ -119,6 +119,7 @@ one negative test** in `e2e/suites/` before the system that could cause it ships
 | X-15 | Deliberate death being more profitable than prestiging | Both life-end paths use the **identical** payout formula (D29-c); the stake multiplies earnings *during* the life and the ending itself pays no bonus. Any future end-of-life bonus reopens this |
 | X-16 | Inflating the life-end payout by repetition or idling | Dungeon and raid credit is **per distinct instance per life**, never per run (D29-e); the time input is **active** time, not logged-in time (D29-d) |
 | X-17 | Difficulty-scumming — lowering the tier for dangerous content and raising it for safe farming | Tier changes only while rested, out of combat, at an inn or capital (D30-d); and because ADR-0029 accrues reward at the rate in force, lowering the tier *costs* reward rather than gaining any |
+| X-17b | Bypassing the at-rest tier rule via group membership — inviting a lower-tier player mid-encounter to downgrade the group | The effective group tier is re-evaluated **only while no member is in combat** (D32-a); joining mid-fight changes nothing until the fight ends |
 
 **X-3 and X-4 are now load-bearing, not merely architectural.** ADR-0024 left the augment layer uncapped,
 so the interaction surface grows combinatorially and these guards are the primary defence rather than a
@@ -151,6 +152,7 @@ the phase that can test it completes.
 | H-8 | An unweighted combined-pool draw does not starve early lives of abilities, because rerolls and injected guarantees absorb bad offers (D22-a) | M-2/M-12 showing levels 2–8 offers skewed to proficiency, or early-life abandonment correlating with low early ability count | Phase 4 |
 | H-9 | An uncapped augment layer stays explainable, because the ADR-0013 AddOn surfaces augment state and active interactions (D24-c) | Players unable to state why their build works; SM-2 diverging from build complexity; support load about unexplained behaviour | Phase 5 |
 | H-10 | A budgeted **remove** does not let players make their builds deterministic by carving the pool down to one category (D27-d) | Build diversity falling as remove spend rises; M-5 outliers clustering among heavy remove users | Phase 4 |
+| H-11 | Requiring a group to play at its lowest tier does not fragment the population by tier (D32-c) | High-tier players unable to find groups; group formation clustering strictly within tiers; cross-tier grouping rates falling as tiers spread | Post-launch, and coupled to Q5 |
 
 H-7 is the most optimistic entry here and should be tested early rather than assumed through to launch.
 
