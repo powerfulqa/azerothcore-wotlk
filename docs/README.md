@@ -45,7 +45,7 @@ next life wider and faster.
 **Foundation documentation only.** No code, no schema, no module, and no build has been
 run. Every design document is marked *Proposed* except the accepted ADRs.
 
-Fourteen decisions are settled (one superseded the same day):
+Fifteen decisions are settled (one superseded the same day):
 
 | ADR | In one line |
 |---|---|
@@ -63,14 +63,15 @@ Fourteen decisions are settled (one superseded the same day):
 | 0014 | *Reserved — held in the private decision store (ADR-0005)* |
 | **0015** | The server runs in **Docker on a dedicated remote host** — upstream's own compose stack, no divergence |
 | **0016** | The private decision store is a **local repository with an encrypted offline backup** — no third party holds it |
+| **0017** | Live e2e runs against a **full local Docker stack**; the production host is never a test target |
 
 Those answers raised ten further questions (Q11–Q20), one of which (Q18) was dissolved
 rather than answered. Fourteen remain open and are deliberately unanswered rather than
 guessed at.
 
-**Next action:** answer **Q22** — e2e topology. ADR-0015 puts the server on a separate
-host, so we must decide whether development runs its own local stack or tests reach the
-remote one. It shapes every live-stack test from Phase 1 onward. Then **Q11**.
+**Next action:** answer **Q23** — the backup and restore policy. D15-b makes a *tested
+restore* a blocking prerequisite to creating the first persistent table, and D16-a leaves
+the private store with the same gap. Then **Q11**.
 
 ## Conventions in these documents
 

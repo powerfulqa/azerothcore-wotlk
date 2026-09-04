@@ -30,6 +30,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0014 | *Reserved — held in the private decision store (ADR-0005)* | **Accepted** | 2026-09-04 |
 | 0015 | The server runs in Docker on a dedicated remote host | **Accepted** | 2026-09-04 |
 | 0016 | The private decision store is a local repository with an encrypted offline backup | **Accepted** | 2026-09-05 |
+| 0017 | Live e2e runs against a full local Docker stack on the development machine | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -714,6 +715,61 @@ time.
 
 ---
 
+## ADR-0017 — Live e2e runs against a full local Docker stack on the development machine
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q22
+
+**Context.** ADR-0015 put the server on a separate host, and `AGENTS.md` prefers live-stack e2e "when a local
+auth+world+MySQL stack is available". D15-c asked which stack the tests target.
+
+**What was verified.**
+- `[V]` **Live e2e is destructive by design.** `e2e/README.md:220` — *"Live e2e mutates a real realm.
+  Cleanup is mandatory."* It creates accounts at **GM level 3** and warns *"Do not reuse real player
+  accounts"* (`e2e/README.md:25`); it writes rows to `acore_world` for spawns and game objects and removes
+  them with SQL DELETE (`e2e/README.md:228-232`). Correctness depends on cleanup running, so a crashed or
+  killed run leaves residue.
+- `[V]` **The target is one environment variable from anywhere.** `E2E_AUTH_ADDR`, `E2E_AUTH_DSN`,
+  `E2E_CHAR_DSN` and `E2E_WORLD_DSN` default to `127.0.0.1` (`e2e/README.md:48-51`) but accept any host.
+- `[V]` `/e2e/.env` is gitignored (`.gitignore:22`) and `e2e/.env.example` ships as the template, so DSNs
+  cannot reach the repository by accident.
+- `[V]` Upstream provides the local stack: the compose services plus `ac-dev-server`
+  (`acore/ac-wotlk-dev-server`, with its own build and `ac-build-dev` volume, `docker-compose.yml:170-208`).
+
+**Decision.** Live e2e runs against a **full local Docker stack on the development machine**, using the
+harness's `127.0.0.1` defaults unchanged. **The production host is never a test target.**
+
+**Rationale.** Against T-6 (persistent progression has no reset valve), D7-a (the prestige reset has no undo)
+and D15-b (the `ac-database` volume is the only copy), a destructive suite that creates GM accounts must not
+be able to reach live player state. Keeping the stack local means production DSNs never exist in the
+development environment, so the accident is structurally unavailable rather than merely discouraged — and the
+safe configuration is also the default one, which is the cheapest kind of safety to sustain.
+
+**Consequences.**
+
+- **D17-a — the development machine carries the stack:** MySQL, worldserver, authserver and the client-data
+  volume. `ac-dev-server` is the supported route. This is a real resource commitment and should be sized
+  before Phase 1 rather than discovered during it.
+- **D17-b — the operative control is an absence.** Production credentials and DSNs must never be placed in a
+  development shell, `e2e/.env`, or any editor run configuration. `.gitignore:22` stops them reaching the
+  repository; nothing stops them reaching a shell.
+- `[O]` **D17-c — residual risk, accepted knowingly.** A loopback guard in the harness — refusing to run
+  unless the target resolves to loopback, overridable by an explicit flag — was offered alongside this option
+  and not taken. The control therefore remains **procedural rather than enforced**. Recorded so it is a known
+  accepted risk rather than an oversight; adding the guard later is small and cheap, and is the first thing
+  to revisit if the stack is ever reconfigured or shared.
+- **D17-d — ephemeral-per-run stays available.** `compose up` / test / `compose down -v` gives isolation that
+  does not depend on cleanup correctness. Worth adding for CI on top of this decision, not instead of it.
+- **D17-e — `QA_STRATEGY.md`'s live-e2e gates become actionable.** Several change types already say live e2e
+  is *required*; that was aspirational while no stack existed. It now binds, and `AGENTS.md`'s preference for
+  live-stack e2e over unit-sized reasoning applies from Phase 1.
+- Scratch work stays in `e2e/local/` (gitignored) per `AGENTS.md`; keepers are promoted to `e2e/suites/` or
+  `e2e/smoke/`.
+
+**Cost to reverse.** Low. It is a local environment choice; the harness targets whatever the environment
+says.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -725,7 +781,6 @@ ADR-0013 amends **T-10**, which now permits a required AddOn but still forbids M
 
 | Q | Decision | Blocks | Cost to reverse |
 |---|---|---|---|
-| **Q22** | e2e topology: a local dev stack, or tests against the remote host? (D15-c) | How every live-stack test runs from Phase 1 on | **High** |
 | Q23 | Backup and restore policy for the `ac-database` volume (D15-b) | Prerequisite to the first persistent table | **High** |
 | **Q11** | May prestige change the vessel's chassis? (promoted by D11-d — chassis now fixes the ability pool) | Whether a vessel is locked out of most content for every life | **High** |
 | Q15 | Offer composition: one option of each type, or N from a combined pool? (wild card and per-level) | Feel of every choice; draft generator | Medium |
@@ -741,4 +796,5 @@ ADR-0013 amends **T-10**, which now permits a required AddOn but still forbids M
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** Q22 — e2e topology, which shapes every live-stack test from Phase 1 on. Then Q11.
+**Next:** Q23 — backup and restore policy, which D15-b makes a prerequisite to the first persistent
+table. Then Q11.

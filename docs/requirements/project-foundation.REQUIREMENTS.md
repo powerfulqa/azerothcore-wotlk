@@ -490,6 +490,16 @@ Ordered by how much each constrains everything downstream.
   passphrase-encrypted archive taken off-machine by hand, so no third party holds the material. The
   public/private boundary is recorded in that ADR. Its known weakness is D16-a: redundancy is a manual habit
   until a restore has actually been tested.
+- **Q22 — ANSWERED 2026-09-05 → ADR-0017.** Live e2e runs against a **full local Docker stack on the
+  development machine**, using the harness's loopback defaults; the production host is never a test target.
+  `[V]` Justified because the suite is destructive by design — it creates GM level 3 accounts and writes
+  world-DB rows with mandatory cleanup (`e2e/README.md:25`, `:220`, `:228-232`). Residual risk **D17-c**: a
+  loopback guard was offered and declined, so the control is procedural rather than enforced.
+- **Q23 (next)** — **Backup and restore policy.** **D15-b** makes a *tested restore* — not merely a
+  configured backup — a blocking prerequisite to creating the first persistent table, because the database
+  lives in the `ac-database` named volume that `docker compose down -v` destroys, and T-6 and D7-a leave no
+  reset valve and no undo. **D16-a** is the same gap in the private decision store, where no backup has yet
+  been taken. What is the schedule, retention, destination and restore-verification procedure, for both?
 
 ---
 
@@ -501,4 +511,5 @@ Ordered by how much each constrains everything downstream.
 4. **§9** — anti-exploit register complete, or is something missing?
 5. **§10** — approve the documentation set?
 6. **§11** — approve the phase order, especially the spike-first placement of Phase 1?
-7. **Q1** — I will ask this next, on its own, once the above is settled.
+7. **Q1–Q22** — answered since this document was written; see `../DECISION_LOG.md` for ADR-0007
+   onward. **Q23** is next.
