@@ -45,7 +45,7 @@ next life wider and faster.
 **Foundation documentation only.** No code, no schema, no module, and no build has been
 run. Every design document is marked *Proposed* except the accepted ADRs.
 
-Nineteen decisions are settled (one superseded the same day):
+Twenty decisions are settled (one superseded the same day):
 
 | ADR | In one line |
 |---|---|
@@ -68,14 +68,15 @@ Nineteen decisions are settled (one superseded the same day):
 | **0019** | The chassis is a **starting nudge that converges by 60** — prestige may change it freely (answers Q11 and Q6) |
 | **0020** | **Baseline proficiencies are granted, heavier ones drafted** — gear becomes a fourth draft category |
 | **0021** | Guarantees cover **solo viability only** (sustain + defensive); P-5 role coverage moves to a pool obligation |
+| **0022** | Offers are **N drawn from one combined eligible pool** — composition shifts by itself as eligibility shifts |
 
 Those answers raised ten further questions (Q11–Q20), one of which (Q18) was dissolved
 rather than answered. Fourteen remain open and are deliberately unanswered rather than
 guessed at.
 
-**Next action:** **Q15** — offer composition. Four option types now (ability, upgrade,
-talent, proficiency): is the player shown one of each, or N drawn from a combined pool? It
-also decides where the life-start weapon-family choice lives (D21-f). Then **Q14**.
+**Next action:** **Q14** — decline semantics, the last question still open inside the
+draft: may a player refuse an offer outright and bank nothing, and do unpicked options
+return to the pool later in the same life? Then **Q24**.
 
 ## Conventions in these documents
 

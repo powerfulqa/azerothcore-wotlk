@@ -476,10 +476,12 @@ Ordered by how much each constrains everything downstream.
 - **Q14** — **Decline semantics.** May a player refuse a draft outright and bank nothing, and do unpicked
   powers return to the pool later in the same life? Determines whether guarantees are one-shot, and changes
   how every draft feels.
-- **Q15** — **Offer composition.** For both the wild card and the per-level choice: is the player shown one
-  option of each type, or N options drawn from a combined pool? The first makes every level a comparison
-  across kinds; the second makes the kinds compete for slots. **Now a four-way problem** — ability, upgrade,
-  talent, proficiency (D20-a) — so this matters more than when it was logged.
+- **Q15 — ANSWERED 2026-09-05 → ADR-0022.** **N options drawn from a single combined eligible pool**,
+  unweighted. Composition shifts across a life on its own because eligibility shifts — proficiency fades as
+  it is exhausted, upgrades rise as abilities accumulate. Defensible without weights because ADR-0008's
+  rerolls absorb a poor offer and its guarantees are *injected* above the draw. Residual risk **D22-a /
+  H-8**: early-life offers could skew to proficiency; adding caps later is additive (D22-b). Also settles
+  **D21-f** — the life-start weapon-family choice sits inside ADR-0009's wild card.
 - **Q16** — **Upgrade semantics** (D9-a). Is an upgrade a rank advance on the same spell, or a swap to a
   different, stronger spell? Is upgrade depth capped, and does a capped ability stop being offered?
 - **Q17 — ANSWERED 2026-09-04 → ADR-0011.** Chassis keep their native resource; abilities are curated to

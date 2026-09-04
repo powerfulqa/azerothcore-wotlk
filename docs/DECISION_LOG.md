@@ -35,6 +35,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0019 | The chassis is a starting nudge that converges by level 60 | **Accepted** | 2026-09-05 |
 | 0020 | Baseline proficiencies are granted; heavier ones are drafted | **Accepted** | 2026-09-05 |
 | 0021 | The draft taxonomy: viability guarantees, and a baseline that mirrors the base game | **Accepted** | 2026-09-05 |
+| 0022 | Offers are N options drawn from a single combined eligible pool | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -1013,6 +1014,64 @@ but narrowing it after players have learned to expect a function is a takeaway.
 
 ---
 
+## ADR-0022 — Offers are N options drawn from a single combined eligible pool
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q15, and D21-f
+
+**Context.** ADR-0009 gives the player one choice per level; ADR-0008 sets N at 3 (tunable, offers stored as
+rows); ADR-0020 added proficiency as a fourth option type. Q15 asked how a level's offer is composed across
+those types.
+
+**The observation that shaped the options.** The four types do not have equal availability across a life.
+**Upgrade** is near-empty at level 2 and rich by 50, because it depends on what the player already holds.
+**Proficiency** is the reverse — all of the draftable set is available at level 2 and effectively exhausted
+once the player owns the armour and weapon families they want. Ability and talent are roughly constant. A
+fixed one-option-per-type offer would therefore be structurally wrong at *both* ends of a life: a dead
+upgrade slot early, a dead proficiency slot late.
+
+**Decision.** Each offer is **N options drawn from a single combined pool of everything currently eligible**,
+unweighted. Composition shifts naturally across a life because eligibility shifts — proficiency fades as it
+is exhausted, upgrades rise as abilities accumulate — with no level-band logic to author or maintain.
+
+**D21-f is settled here:** the life-start **weapon-family choice is part of ADR-0009's wild card**, which is
+already a special-cased offer rather than a normal draw.
+
+**Why the simpler generator is defensible.** The two weaknesses of an unweighted draw are already covered by
+decisions taken earlier, which was not obvious when the options were framed:
+- A poor offer is **rerollable**. ADR-0008's earned reroll budget exists precisely for this, so an unlucky
+  draw is a cost against a resource the player manages, not a lost level.
+- Guarantees do **not** depend on the draw. ADR-0008 and ADR-0021 *inject* the sustain and defensive offers
+  when due, so the guarantee mechanism sits above the random draw and cannot be defeated by it.
+
+Weights and per-type caps therefore buy less than they appeared to, at the cost of a generator with level-band
+tuning that would itself need balancing and telemetry.
+
+**Consequences.**
+
+- `[O]` **D22-a — the real residual risk is early-life proficiency flooding, and it needs watching.** At
+  levels 2–8 the eligible pool contains abilities, talents and the *entire* draftable proficiency set, while
+  the upgrade pool is empty. An unweighted draw can therefore offer gear access repeatedly at exactly the
+  point where the player most needs abilities — pressing on P-2 (a viable kit) and X-1 (dead starting kits).
+  Registered as **H-8** so it is falsifiable rather than argued about.
+- **D22-b — the fix, if needed, is cheap and already scoped.** Adding per-type caps or weights converts this
+  into the rejected option C without changing the generator's shape: it is two fields on a component ADR-0008
+  requires regardless. This decision is therefore a deliberate *start simple, measure, escalate if warranted*
+  rather than a bet.
+- **D22-c — eligibility becomes the whole design surface.** With no weights, *everything* about how a life
+  feels is expressed through P-4's eligibility rules and the guarantee schedule. P-4 was already a system
+  requirement rather than per-item curation; this makes it the single highest-leverage component in the draft.
+- **D22-d — the offer ledger must record what was offered, not only what was taken.** Already required by
+  M-2 (amended under ADR-0008), and now load-bearing: H-8 cannot be tested without knowing the type
+  composition of offers the player declined.
+- **D22-e — late-life offers will skew heavily to upgrades.** This is correct rather than a defect: depth is
+  what a mature build should be choosing. But it means the endgame draft feels materially different from the
+  early one, which is a player-communication point, not just a mechanical one.
+
+**Cost to reverse.** Low. It is the simplest configuration of a generator that must exist, and moving to
+weights is additive.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -1028,7 +1087,6 @@ custom DBC.
 |---|---|---|---|
 | Q24 | Acceptable data-loss window, given D2-b requires staked deaths be auditable (D18-e) | Backup frequency; hardcore dispute handling | Medium |
 | Q16 | Upgrade semantics: rank advance, or swap to a stronger spell? Is depth capped? (D9-a) | Phase 4; acquisition schema | Medium |
-| **Q15** | Offer composition: one option of each type, or N from a combined pool? Now **four** types after D20-a | Feel of every level; draft generator | **High** |
 | Q14 | Decline semantics: may a draft be refused outright, and do unpicked powers return to the pool later in the life? | Feel of every draft; guarantee scheduling | Medium |
 | Q4 | Module hosting: separate repo vs vendored in-tree | Phase 1 setup | Medium |
 | Q5 | Audience scale and realm openness | Anti-exploit budget, telemetry investment | Medium |
@@ -1038,5 +1096,4 @@ custom DBC.
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** Q15 (offer composition — now four types, and it also decides where the weapon-family choice
-lives per D21-f), then Q14, then Q24.
+**Next:** Q14 (decline semantics — the last open question inside the draft), then Q24, then Q12/Q16/Q7.

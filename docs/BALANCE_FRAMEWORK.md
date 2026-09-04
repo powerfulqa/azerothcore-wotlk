@@ -140,6 +140,7 @@ the phase that can test it completes.
 | H-5 | Legibility matters more for retention than depth | SM-2 not correlating with SM-8 | Post-launch |
 | H-6 | Stock 3.3.5a level-60 content will be trivialised by an optimised build; scaling or retuning will be required | Content proving appropriately tuned as-is | Phase 7, after V-1 |
 | H-7 | A 3-player tank/healer/DPS target is achievable without per-encounter bespoke tuning | Encounters requiring individual adaptation to be completable | Phase 7 |
+| H-8 | An unweighted combined-pool draw does not starve early lives of abilities, because rerolls and injected guarantees absorb bad offers (D22-a) | M-2/M-12 showing levels 2–8 offers skewed to proficiency, or early-life abandonment correlating with low early ability count | Phase 4 |
 
 H-7 is the most optimistic entry here and should be tested early rather than assumed through to launch.
 
