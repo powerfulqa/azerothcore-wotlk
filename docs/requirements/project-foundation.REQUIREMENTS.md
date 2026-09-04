@@ -466,15 +466,18 @@ Ordered by how much each constrains everything downstream.
 - **Q12** — **Vessel deletion vs life records** (D7-c). If life records back account-level unlocks, deleting a
   vessel must not orphan or destroy them. Are life records reparented to the account, retained orphaned, or is
   vessel deletion restricted?
-- **Q13** — **Protected-category taxonomy** (D8-d). Which role-functions are protected — healing, defensive,
-  AoE, mobility, sustain? — and by what level must each have been offered? Too few and dead builds return;
-  too many and every life converges on the same shape.
+- **Q13 (next)** — **The draft taxonomy.** Two halves, now that ADR-0020 has landed. **(a)** Which
+  role-functions are protected — healing, defensive, AoE, mobility, sustain? — and by what level must each
+  have been offered (D8-d)? Too few and dead builds return; too many and every life converges on the same
+  shape. **(b)** Which proficiencies are baseline rather than drafted (D20-b)? Too generous and the
+  proficiency drafts are worthless; too thin and the early levels are miserable.
 - **Q14** — **Decline semantics.** May a player refuse a draft outright and bank nothing, and do unpicked
   powers return to the pool later in the same life? Determines whether guarantees are one-shot, and changes
   how every draft feels.
 - **Q15** — **Offer composition.** For both the wild card and the per-level choice: is the player shown one
-  option of each type (ability / upgrade / talent), or N options drawn from a combined pool? The first makes
-  every level a comparison across kinds; the second makes the kinds compete for slots.
+  option of each type, or N options drawn from a combined pool? The first makes every level a comparison
+  across kinds; the second makes the kinds compete for slots. **Now a four-way problem** — ability, upgrade,
+  talent, proficiency (D20-a) — so this matters more than when it was logged.
 - **Q16** — **Upgrade semantics** (D9-a). Is an upgrade a rank advance on the same spell, or a swap to a
   different, stronger spell? Is upgrade depth capped, and does a capped ability stop being offered?
 - **Q17 — ANSWERED 2026-09-04 → ADR-0011.** Chassis keep their native resource; abilities are curated to
@@ -505,12 +508,11 @@ Ordered by how much each constrains everything downstream.
   auditable, so a restore that rewinds hours could resurrect a character the realm recorded as dead, or
   destroy the evidence of a legitimate one. Backup frequency must follow from what a hardcore player would
   accept losing, not from convenience.
-- **Q25 (next)** — **Is proficiency granted, or acquired?** (D19-d) `[V]` Armour and weapon proficiency is
-  skill-based and grantable — via `playercreateinfo_skills` (world DB) or `SPELL_EFFECT_PROFICIENCY`
-  (`SpellEffects.cpp:2319`) — so it is now a choice rather than an inherited default. Either every chassis
-  receives every proficiency at life start, making armour type purely cosmetic; or proficiency is itself an
-  **acquisition** the player drafts, which would make gear a real axis of the build and add a draft dimension
-  that is neither ability, talent, upgrade nor augment.
+- **Q25 — ANSWERED 2026-09-05 → ADR-0020.** Baseline proficiencies (cloth, leather, a few weapon types) are
+  granted at life start, satisfying P-2 structurally; plate, mail, shields, two-handers and ranged are
+  **draftable**. `[V]` Granting one is just teaching a spell — `SPELL_EFFECT_SKILL` (118) for the equip gate
+  plus `SPELL_EFFECT_PROFICIENCY` (60) for the client bitmask — so it is draftable and legible for free.
+  Makes gear a **fourth draft category** (D20-a) and registers **X-13** (loot dependency).
 
 ---
 

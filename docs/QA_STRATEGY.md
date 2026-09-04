@@ -79,7 +79,9 @@ ships 108 table files, 35 named `character_*`, and 51 declaring a `guid int unsi
 which mean *character* guid.
 
 **No prestige implementation may begin until a reset manifest exists** that classifies every relevant table
-as **cleared**, **preserved**, or **archived to the life record**, derived from the schema in this checkout
+as **cleared**, **preserved**, or **archived to the life record**, derived from the schema in this checkout.
+**It must also cover state that is not a table:** per D20-d, drafted proficiency **skills** and the client
+**proficiency bitmask** both survive a naive reset and would hand the next life a silent permanent advantage
 and cited `file.sql:line` — not from memory. The manifest is reviewed as a document in its own right, and
 each classification needs a stated reason.
 

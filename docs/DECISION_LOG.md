@@ -33,6 +33,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0017 | Live e2e runs against a full local Docker stack on the development machine | **Accepted** | 2026-09-05 |
 | 0018 | Backups are encrypted logical dumps of the irreplaceable databases, with an automated restore test | **Accepted** | 2026-09-05 |
 | 0019 | The chassis is a starting nudge that converges by level 60 | **Accepted** | 2026-09-05 |
+| 0020 | Baseline proficiencies are granted; heavier ones are drafted | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -891,6 +892,67 @@ have been built on top of a particular shape.
 
 ---
 
+## ADR-0020 — Baseline proficiencies are granted; heavier ones are drafted
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q25
+
+**Context.** ADR-0019 established that armour and weapon proficiency is skill-based rather than class-locked,
+making it grantable — and therefore a design choice rather than an inherited default (D19-d).
+
+**What was verified.** `[V]` Granting proficiency is a **two-part, entirely stock mechanism, and both parts
+live in a spell**:
+- `SPELL_EFFECT_SKILL` (118, `src/server/shared/SharedDefines.h:884`) grants the skill, which is what the
+  equip gate actually reads — `GetSkillValue(itemSkill) == 0`
+  (`src/server/game/Entities/Player/PlayerStorage.cpp:2340`).
+- `SPELL_EFFECT_PROFICIENCY` (60) sets the client-side bitmask and calls `SendProficiency`
+  (`src/server/game/Spells/SpellEffects.cpp:2319-2339`), so the interface stops greying the item out.
+
+This is how the game's own class proficiency spells work — one spell carrying both effects. **Granting a
+proficiency is therefore just teaching a spell**, which makes it draftable through the machinery ADR-0008
+already defines, and legible at no cost: each has a real client name, icon and tooltip.
+
+`[V]` The available set: **armour** — Plate 293, Mail 413, Leather 414, Cloth 415, Shield 433; **weapons** —
+Swords 43, Axes 44, Bows 45, Guns 46, Maces 54, Staves 136, Daggers 173 and others
+(`src/server/shared/SharedDefines.h:3104-3198`).
+
+**Decision.** Every life begins proficient in a **baseline** set — cloth, leather and a small number of
+weapon types. The heavier and more specialised proficiencies — plate, mail, shields, two-handed weapons,
+ranged — are **draftable acquisitions**.
+
+**Rationale.** This satisfies P-2's "small, *viable* combat kit" **structurally rather than by luck**: a
+player can always wear something, so no draft can strand them. It simultaneously keeps Pillar 1's accept
+criterion — gear and the world matter *more*, not less — which granting everything would discard, since
+"wear the highest item level" is not a decision. Full drafting was rejected because a proficiency whose gear
+never drops is a dead end produced by loot tables we do not author.
+
+**Consequences.**
+
+- **D20-a — the draft now has a fourth option *type*.** ADR-0009's menu was new ability / upgrade / talent;
+  proficiency joins it. Note this is distinct from the three power *layers* of ADR-0001 — the draft offers
+  four kinds of thing, the power model has three layers plus depth. **Q15 (offer composition) becomes a
+  four-way problem**, and its answer now matters more.
+- **D20-b — the baseline set is undefined and needs a taxonomy.** Which armour and which weapons are granted
+  is the same *kind* of question as Q13's protected categories, so **Q13 is extended to cover it** rather
+  than minting another number. Too generous a baseline and the drafts are worthless; too thin and early
+  levels are miserable.
+- `[O]` **D20-c — loot dependency is a new balance risk, registered as X-13.** A drafted proficiency whose
+  gear never drops is a wasted slot. This depends on **V-3** (whether the stock 1–60 world supplies each
+  armour and weapon type at the right levels), which is still unverified. Phase 1 should measure the drop and
+  quest-reward distribution by armour type and level band before the draft pool is finalised.
+- **D20-d — the prestige reset manifest gains two entries.** D7-a's table-by-table manifest must clear both
+  the proficiency **skills** and the client **bitmask** on reset. A vessel retaining plate proficiency into
+  its next life would be a silent, permanent advantage — exactly the completeness failure D7-a warns of.
+- **D20-e — this is where the classless promise becomes visible.** A chassis with a caster stat curve
+  (ADR-0019) that has drafted plate and a shield is a build the base game cannot express. That is the
+  distinctiveness Risk R-1 demands, arriving from systems rather than content.
+- **D20-f — Pillar 4 is free here.** Each proficiency is a real client spell, so its name, icon and tooltip
+  are already correct and truthful. No D10-b divergence is introduced.
+
+**Cost to reverse.** Medium. The baseline/draftable split is data, but the draft pool, the guarantee schedule
+and the balance pass are built on top of the split.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -904,11 +966,10 @@ custom DBC.
 
 | Q | Decision | Blocks | Cost to reverse |
 |---|---|---|---|
-| **Q25** | Is armour/weapon proficiency granted to all chassis, or is it itself an acquisition? (D19-d) | Whether gear is a build axis; draft dimensions | **High** |
 | Q24 | Acceptable data-loss window, given D2-b requires staked deaths be auditable (D18-e) | Backup frequency; hardcore dispute handling | Medium |
-| Q15 | Offer composition: one option of each type, or N from a combined pool? (wild card and per-level) | Feel of every choice; draft generator | Medium |
 | Q16 | Upgrade semantics: rank advance, or swap to a stronger spell? Is depth capped? (D9-a) | Phase 4; acquisition schema | Medium |
-| Q13 | Protected-category taxonomy: which role-functions are guaranteed an offer, and by what level (D8-d) | Phase 4 draft system; P-5 role coverage | Medium |
+| **Q13** | Draft taxonomy: which role-functions are guaranteed an offer (D8-d), **and which proficiencies are baseline vs drafted** (D20-b) | Phase 4 draft system; P-5 role coverage; early-game viability | **High** |
+| **Q15** | Offer composition: one option of each type, or N from a combined pool? Now **four** types after D20-a | Feel of every level; draft generator | **High** |
 | Q14 | Decline semantics: may a draft be refused outright, and do unpicked powers return to the pool later in the life? | Feel of every draft; guarantee scheduling | Medium |
 | Q4 | Module hosting: separate repo vs vendored in-tree | Phase 1 setup | Medium |
 | Q5 | Audience scale and realm openness | Anti-exploit budget, telemetry investment | Medium |
@@ -918,4 +979,5 @@ custom DBC.
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** Q25 — raised by ADR-0019 and potentially a new draft dimension. Then Q13/Q14, then Q24.
+**Next:** Q13 (the draft taxonomy, now covering both guarantees and the proficiency baseline), then
+Q15, then Q14. Q24 after.

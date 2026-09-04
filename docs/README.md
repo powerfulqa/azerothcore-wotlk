@@ -45,7 +45,7 @@ next life wider and faster.
 **Foundation documentation only.** No code, no schema, no module, and no build has been
 run. Every design document is marked *Proposed* except the accepted ADRs.
 
-Seventeen decisions are settled (one superseded the same day):
+Eighteen decisions are settled (one superseded the same day):
 
 | ADR | In one line |
 |---|---|
@@ -66,14 +66,15 @@ Seventeen decisions are settled (one superseded the same day):
 | **0017** | Live e2e runs against a **full local Docker stack**; the production host is never a test target |
 | **0018** | Backups are **encrypted logical dumps of `auth`+`characters`** with an automated restore test; `world` is rebuilt from the repo |
 | **0019** | The chassis is a **starting nudge that converges by 60** — prestige may change it freely (answers Q11 and Q6) |
+| **0020** | **Baseline proficiencies are granted, heavier ones drafted** — gear becomes a fourth draft category |
 
 Those answers raised ten further questions (Q11–Q20), one of which (Q18) was dissolved
 rather than answered. Fourteen remain open and are deliberately unanswered rather than
 guessed at.
 
-**Next action:** **Q25** — is armour and weapon proficiency simply granted to every
-chassis, or is proficiency itself an acquisition the player drafts? ADR-0019 raised it, and
-it may add a build axis that is neither ability, talent, upgrade nor augment. Then Q13/Q14.
+**Next action:** **Q13** — the draft taxonomy. It now covers two things: which
+role-functions are guaranteed an offer (D8-d) and which proficiencies are baseline rather
+than drafted (D20-b). Then **Q15** (offer composition, now four-way) and **Q14**.
 
 ## Conventions in these documents
 
