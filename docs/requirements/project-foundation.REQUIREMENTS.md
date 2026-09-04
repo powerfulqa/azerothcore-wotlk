@@ -551,10 +551,14 @@ Ordered by how much each constrains everything downstream.
   now unbounded by design and needs a hard runtime ceiling (**Q27**); **D24-b** X-3/X-4 guards become
   load-bearing; **D24-c** Pillar 4 is strained and the ADR-0013 AddOn must surface augment state to rescue
   it (**H-9**).
-- **Q27 (after Q16)** — **The technical trigger budget** (D24-a). `[V]` T-7 exists because
-  `UnitScript::OnDamage`/`OnHeal` run at very high frequency. With an unbounded augment count, per-event
-  cost is unbounded too, so a hard runtime ceiling — enforced regardless of any design cap — is mandatory.
-  What is the budget, how is it measured, and what happens when a build exceeds it?
+- **Q27 — ANSWERED 2026-09-05 → ADR-0031.** The augment system registers **one** combat hook and dispatches
+  internally through a **trigger-type index**, so cost scales with the acting player's matching augments
+  rather than the catalogue. Only **trigger-bearing** augments are capped; aura-, cooldown- and
+  scaling-shaped augments stay uncapped per ADR-0024. `[V]` The engine already buckets hooks per type with an
+  empty short-circuit (`ScriptMgrMacros.h:72-74`), so the unbounded case would have been ours to create.
+  `[V]` Open-world difficulty runs on player auras (`SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN` and kin), costing
+  no script dispatch — so **D30-b largely dissolves**. The cap is *computed* from a measured per-trigger cost
+  and a chosen per-event budget (D31-f), not guessed.
 
 ---
 

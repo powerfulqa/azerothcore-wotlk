@@ -54,6 +54,7 @@ we should use it.
 | Telemetry addition | — | **required** | **required** | — | — | **required** (TM-3) |
 | **Prestige reset path** | **required** | **required** | **required** | **required** | **required** (D7-a) | **required** |
 | **Client AddOn change** (ADR-0013) | — | **required** | — | **required** | — | if per-frame work |
+| **Augment trigger or combat hook** (D31-d) | **required** | **required** | — | — | **required** (X-3, X-4) | **required** — and a review check that it did **not** add a new hook registration |
 | **First persistent table** (D15-b) | — | **required** | **required** | — | — | — · **blocked until a tested backup/restore exists** |
 
 A change type not listed defaults to the strictest comparable row.

@@ -45,7 +45,7 @@ next life wider and faster.
 **Foundation documentation only.** No code, no schema, no module, and no build has been
 run. Every design document is marked *Proposed* except the accepted ADRs.
 
-**Twenty-seven** decisions are accepted (ADR-0011 was superseded the same day; ADR-0003 and ADR-0004
+**Twenty-eight** decisions are accepted (ADR-0011 was superseded the same day; ADR-0003 and ADR-0004
 remain *Proposed*):
 
 | ADR | In one line |
@@ -78,14 +78,15 @@ remain *Proposed*):
 | **0028** | **Two layers, one currency, every sink is agency** — no meta-prestige, nothing power-shaped for sale (answers Q8) |
 | **0029** | Currency is **escrowed and banked at life end, scaled by what the life achieved** — content, level, active time |
 | **0030** | Difficulty is a **selectable modifier layer over the world** — unlocked by content, switchable at rest (amends ADR-0002) |
+| **0031** | **One indexed combat hook**; only *trigger-bearing* augments are capped, and difficulty runs on player auras (narrows ADR-0024) |
 
 Those answers raised ten further questions (Q11–Q20), one of which (Q18) was dissolved
 rather than answered. Fourteen remain open and are deliberately unanswered rather than
 guessed at.
 
-**Next action:** **Q27** — the hard runtime ceiling on the combat hot path. It now carries
-*two* unbounded systems: uncapped augments (ADR-0024) and open-world difficulty modifiers
-(D30-b). Then **Q30** (mixed-tier grouping) and **Q24**.
+**Next action:** **Q30** — mixed-tier grouping. ADR-0030 makes the difficulty tier a
+per-character choice and ADR-0002 sets a three-player baseline, so a group spanning tiers is
+a common case. Then **Q24**, the gear affix layer, and **Q28**.
 
 ## Conventions in these documents
 

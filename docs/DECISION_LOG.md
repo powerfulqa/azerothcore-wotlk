@@ -44,6 +44,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0028 | Two layers, one currency, and every sink is agency | **Accepted** | 2026-09-05 |
 | 0029 | Currency is escrowed during a life and banked at life end, scaled by what the life achieved | **Accepted** | 2026-09-05 |
 | 0030 | Difficulty is a selectable modifier layer over the world, unlocked by content, switchable at rest | **Accepted** | 2026-09-05 |
+| 0031 | One indexed combat hook, and only trigger-bearing augments are capped | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -1175,7 +1176,8 @@ a choice, never as a bare grant.** Without that, Pillar 2 does fail in this laye
 **Consequences — the three real costs, recorded rather than discovered later.**
 
 - **⚠ D24-a — T-7's trigger budget becomes unknowable at design time, so it needs a *technical* ceiling
-  regardless.** `[V]` T-7 exists because `UnitScript::OnDamage`/`OnHeal` "run at very high frequency"
+  regardless.** **Answered by ADR-0031**, which narrows this record: one indexed combat hook, and a cap on
+  the *trigger-bearing* subset only. The uncapped intent below survives for every other augment shape. `[V]` T-7 exists because `UnitScript::OnDamage`/`OnHeal` "run at very high frequency"
   (`requirements/project-foundation.REQUIREMENTS.md:235`). Each augment potentially adds a combat-path hook,
   so an unbounded count means unbounded per-event cost. **A hard technical ceiling — a trigger budget
   enforced at runtime, independent of any design cap — is now mandatory rather than prudent.** This is
@@ -1579,6 +1581,67 @@ tied to content and an economy priced against tier rates would both need revisit
 
 ---
 
+## ADR-0031 — One indexed combat hook, and only trigger-bearing augments are capped
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q27 · **Narrows:** ADR-0024
+
+**Context.** ADR-0024 left the augment layer uncapped, making T-7's combat-path budget unbounded by design
+(D24-a). ADR-0030 then put open-world difficulty modifiers on the same path (D30-b). Q27 asked how the cost
+is bounded.
+
+**What was verified.**
+- `[V]` **AzerothCore's hook dispatch is already efficient in the right way.**
+  `src/server/game/Scripting/ScriptMgrMacros.h:72-74` buckets hooks *per hook type* and short-circuits on
+  empty: `if (!ScriptRegistry<scriptType>::EnabledHooks[hookType].empty()) for (...) { action; }`. Cost is
+  therefore O(scripts registered **for that hook**), not O(all scripts), and genuinely **zero** when nothing
+  registers it.
+- `[V]` **Per-player damage scaling needs no script at all.** `SPELL_AURA_MOD_DAMAGE_PERCENT_DONE` (79),
+  `SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN` (87) and `SPELL_AURA_MOD_HEALING_PCT` (118) exist
+  (`src/server/game/Spells/Auras/SpellAuraDefines.h:142-181`) and are evaluated inside the damage
+  calculation, which already iterates auras.
+
+**The danger was ours, not the engine's.** If each augment registered its own `UnitScript`, N augments would
+mean N virtual calls on every damage event, and ADR-0024 made N unbounded.
+
+**Decision.**
+1. **The augment system registers exactly one combat hook**, and dispatches internally through an index keyed
+   by **trigger type**. Cost therefore scales with *the acting player's augments matching this event*, never
+   with the catalogue.
+2. **Only trigger-bearing augments are capped.** A hard ceiling applies to how many combat-hooking augments a
+   single build may hold. Augments expressed as auras, cooldown changes, resource changes or scaling
+   transformations remain **uncapped**, per ADR-0024.
+3. **Open-world difficulty is implemented as player auras**, not a combat hook, using the effects above.
+
+**Consequences.**
+
+- **D31-a — this narrows ADR-0024 rather than overturning it.** Its intent — that the augment *layer* is
+  uncapped and achievements keep paying — survives intact, because most augment shapes in P-6 do not need a
+  combat hook. What is now bounded is the *trigger-bearing subset*. Recorded as an amendment so the change is
+  visible rather than implied.
+- **D31-b — D30-b's open-world problem largely dissolves.** Difficulty as player auras costs no script
+  dispatch, and auras are iterated in the damage path regardless. The remaining cost is a handful of extra
+  aura entries per player, which is ordinary. Q27 therefore no longer blocks two systems — it blocks one.
+- **D31-c — the catalogue schema needs a trigger flag and trigger type from the first migration.** Both the
+  cap and the dispatch index depend on knowing which augments hook combat and on what. This is not an
+  optimisation to add later; the index *is* the design.
+- **⚠ D31-d — "one hook per system" is a convention the engine cannot enforce.** Nothing stops a future
+  contributor registering a per-augment script and reintroducing the unbounded case. It belongs in
+  `.agents/docs/` review rules and in the module's own contribution notes, or it will erode.
+- **D31-e — X-3 and X-4 get their natural home.** The trigger-depth limit and re-entrancy guard that
+  `BALANCE_FRAMEWORK.md` requires "in the augment system's design, not retrofitted" now have an obvious
+  place: the single dispatcher every trigger passes through.
+- **D31-f — the cap is a computed value, not an arbitrary one.** T-7 still demands a *measured* per-call
+  cost. Given a measured per-trigger cost and a chosen per-event budget, the ceiling follows by division —
+  so the number should be derived in Phase 5 from real measurement rather than guessed now, and re-derived
+  whenever the dispatcher changes.
+- **D31-g — this makes T-7 testable rather than aspirational.** A bounded worst case can be stated before
+  Phase 5 starts: the most expensive legal build is the cap multiplied by the measured per-trigger cost.
+
+**Cost to reverse.** Low for the cap, which is a number. High for the architecture — a per-augment
+registration pattern, once adopted across a catalogue, would be expensive to unwind.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -1593,7 +1656,6 @@ custom DBC.
 | Q | Decision | Blocks | Cost to reverse |
 |---|---|---|---|
 | Q24 | Acceptable data-loss window, given D2-b requires staked deaths be auditable (D18-e) | Backup frequency; hardcore dispute handling | Medium |
-| **Q27** | The technical trigger budget: the hard runtime ceiling on the combat hot path (D24-a) — now carrying **both** uncapped augments and open-world difficulty modifiers (D30-b) | Blocks Phase 5 **and** the difficulty layer | **High** |
 | **Q30** | Mixed-tier grouping: whose difficulty applies when a 3-player group spans tiers? (D30-f) | Common case, not an edge case, under ADR-0002's group baseline | **High** |
 | Q4 | Module hosting: separate repo vs vendored in-tree | Phase 1 setup | Medium |
 | Q5 | Audience scale and realm openness | Anti-exploit budget, telemetry investment | Medium |
@@ -1603,5 +1665,4 @@ custom DBC.
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** the remaining survey items — the dynamic difficulty cap (amends ADR-0002) and the gear affix
-layer — then Q29, Q27 and Q24.
+**Next:** Q30 (mixed-tier grouping), then Q24, then the gear affix layer, then Q28.
