@@ -466,11 +466,13 @@ Ordered by how much each constrains everything downstream.
 - **Q12** — **Vessel deletion vs life records** (D7-c). If life records back account-level unlocks, deleting a
   vessel must not orphan or destroy them. Are life records reparented to the account, retained orphaned, or is
   vessel deletion restricted?
-- **Q13 (next)** — **The draft taxonomy.** Two halves, now that ADR-0020 has landed. **(a)** Which
-  role-functions are protected — healing, defensive, AoE, mobility, sustain? — and by what level must each
-  have been offered (D8-d)? Too few and dead builds return; too many and every life converges on the same
-  shape. **(b)** Which proficiencies are baseline rather than drafted (D20-b)? Too generous and the
-  proficiency drafts are worthless; too thin and the early levels are miserable.
+- **Q13 — ANSWERED 2026-09-05 → ADR-0021.** **(a)** Guarantees cover **solo viability only** — an offer of
+  sustain and a defensive by defined levels. P-5 role coverage is **not** a per-life guarantee; it becomes a
+  pool-design obligation gated before the catalogue ships and monitored via M-2…M-5 and the new **M-12**.
+  **(b)** `[V]` Baseline = **Cloth + Leather + one weapon family** chosen at life start; **Plate, Mail,
+  Shield**, two-handers and ranged are draftable. Grounded in `playercreateinfo_skills.sql`: cloth is the
+  only universal, and mail and plate are already level-40 unlocks in the base game — so the split mirrors
+  the base game's own gating rather than departing from it.
 - **Q14** — **Decline semantics.** May a player refuse a draft outright and bank nothing, and do unpicked
   powers return to the pool later in the same life? Determines whether guarantees are one-shot, and changes
   how every draft feels.

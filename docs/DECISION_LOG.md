@@ -34,6 +34,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0018 | Backups are encrypted logical dumps of the irreplaceable databases, with an automated restore test | **Accepted** | 2026-09-05 |
 | 0019 | The chassis is a starting nudge that converges by level 60 | **Accepted** | 2026-09-05 |
 | 0020 | Baseline proficiencies are granted; heavier ones are drafted | **Accepted** | 2026-09-05 |
+| 0021 | The draft taxonomy: viability guarantees, and a baseline that mirrors the base game | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -953,6 +954,65 @@ and the balance pass are built on top of the split.
 
 ---
 
+## ADR-0021 — The draft taxonomy: viability guarantees, and a baseline that mirrors the base game
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q13 (both halves) · **Refines:** D8-d
+
+**Context.** ADR-0008 introduced protected categories guaranteeing "a role-critical function is offered", and
+ADR-0020 added the question of which proficiencies are baseline rather than drafted. Q13 covered both.
+
+**The structural finding.** D8-d conflated two different requirements:
+- **Solo viability** is a property of **each individual life**. It can fail at any moment, for one player, and
+  the failure is a dead build (X-1, X-2).
+- **Role coverage** (P-5: tank, healer, DPS and hybrid each reachable by multiple distinct archetypes) is a
+  property of **the pool**. It is verified once by design review and continuously by telemetry.
+
+Guaranteeing the second per-life is what produces D8-b's convergence — every life rhyming — for no gain in
+safety. Separating them lets the guarantee set be far smaller and the divergence far greater.
+
+**Decision — (a) guarantees.** Each life is guaranteed an **offer** of **sustain** (health recovery) and a
+**defensive** by defined levels. Nothing else. Damage needs no guarantee because P-2 already requires a
+viable starting kit. **P-5 role coverage is not a per-life guarantee**; it becomes a pool-design obligation.
+
+**Decision — (b) baseline proficiency.** `[V]` Grounded in the base game's own pattern
+(`data/sql/base/db_world/playercreateinfo_skills.sql`, 77 rows): **Cloth is the only proficiency all ten
+classes start with**; Leather covers eight of ten; **Mail and Plate are already level-gated progression** —
+Hunter and Shaman earn Mail at 40, Warrior and Paladin earn Plate at 40, and only the Death Knight begins in
+plate; Shield is restricted to three classes.
+
+Therefore: **baseline = Cloth + Leather + one weapon family chosen at life start.** **Draftable = Plate,
+Mail, Shield, two-handed families and the ranged families.** ADR-0020's split is not a departure from the
+base game — it is the base game's own gating, moved from level thresholds onto the draft.
+
+**Consequences.**
+
+- **D21-a — P-5 needs a named gate, or it becomes an aspiration.** Before the ability catalogue ships, it
+  must be *demonstrated* that tank, healer, DPS and hybrid builds are each reachable with multiple distinct
+  archetypes, and monitored thereafter through M-2…M-5. Moving P-5 off the per-life guarantee only works if
+  something else actually enforces it.
+- **D21-b — "sustain" and "defensive" require operational definitions or the guarantee is unenforceable.**
+  These become values on the **role-function axis** that D8-d already requires of P-4's tag system. A heal, a
+  leech, a regeneration effect and a consumable-free recovery are not obviously the same thing, and the
+  guarantee generator cannot be written until the boundary is drawn.
+- **D21-c — the guarantee levels are undefined.** "By defined levels" needs numbers before Phase 4. They are
+  tuning values, but their absence blocks implementation rather than merely tuning.
+- **D21-d — X-1 becomes testable.** `BALANCE_FRAMEWORK.md` already demands "an automated viability check over
+  every legal starting kit". With baseline fixed at Cloth + Leather + one weapon family, and guarantees fixed
+  at sustain and defensive, the set of legal starting kits is now **enumerable**, so that check can actually
+  be written instead of aspired to.
+- **D21-e — a deliberate accepted risk, and it needs an instrument.** A life may legitimately reach 60 with
+  no AoE, no crowd control and no mobility. That is the intended cost of divergence, not a defect. It must be
+  *watched*: **M-12 — per-life category coverage at life end**, correlated against completion and quit
+  behaviour. If missing AoE predicts abandonment, this decision is wrong and the telemetry will say so. Per
+  Pillar 5 the metric must exist before the guarantee set ships.
+- **D21-f — where the weapon-family choice lives is open.** Making it part of ADR-0009's wild card selection
+  is the natural fit, but that is a question about what the wild card contains — **Q15**, not this record.
+
+**Cost to reverse.** Low for (b), which is data. Medium for (a): widening the guarantee set later is easy,
+but narrowing it after players have learned to expect a function is a takeaway.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -968,7 +1028,6 @@ custom DBC.
 |---|---|---|---|
 | Q24 | Acceptable data-loss window, given D2-b requires staked deaths be auditable (D18-e) | Backup frequency; hardcore dispute handling | Medium |
 | Q16 | Upgrade semantics: rank advance, or swap to a stronger spell? Is depth capped? (D9-a) | Phase 4; acquisition schema | Medium |
-| **Q13** | Draft taxonomy: which role-functions are guaranteed an offer (D8-d), **and which proficiencies are baseline vs drafted** (D20-b) | Phase 4 draft system; P-5 role coverage; early-game viability | **High** |
 | **Q15** | Offer composition: one option of each type, or N from a combined pool? Now **four** types after D20-a | Feel of every level; draft generator | **High** |
 | Q14 | Decline semantics: may a draft be refused outright, and do unpicked powers return to the pool later in the life? | Feel of every draft; guarantee scheduling | Medium |
 | Q4 | Module hosting: separate repo vs vendored in-tree | Phase 1 setup | Medium |
@@ -979,5 +1038,5 @@ custom DBC.
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** Q13 (the draft taxonomy, now covering both guarantees and the proficiency baseline), then
-Q15, then Q14. Q24 after.
+**Next:** Q15 (offer composition — now four types, and it also decides where the weapon-family choice
+lives per D21-f), then Q14, then Q24.

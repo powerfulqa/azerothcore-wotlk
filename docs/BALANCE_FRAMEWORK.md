@@ -78,6 +78,7 @@ judges. Each metric names the layer that must produce it.
 | M-9 | Currency generation and spending | economy ledger |
 | M-10 | Reward acquisition | acquisition ledger |
 | M-11 | Exploit indicators (§5) | anti-exploit counters |
+| M-12 | Per-life category coverage at life end — which role-functions the build ended up with — correlated against completion and quit behaviour (D21-e) | acquisition ledger + life record |
 
 **Constraints:**
 
