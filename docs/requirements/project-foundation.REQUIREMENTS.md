@@ -462,6 +462,12 @@ Ordered by how much each constrains everything downstream.
   draft width and pool breadth, and the reroll/hold/remove budgets. **Nothing power-shaped is for sale**,
   which satisfies Pillar 3 and D2-a structurally rather than by vigilance. Raised **Q28** (retention once
   sinks max out, Phase 7) and **Q29** (when currency is credited — exploit-relevant, blocks Phase 2).
+- **Q29 — ANSWERED 2026-09-05 → ADR-0029.** **Escrow**: currency accrues during a life and is banked to the
+  account **only at life end**, scaled by four inputs — distinct dungeons and raids completed, achievements
+  earned, level reached, and **active** played time. Both life-end paths use the **identical** formula
+  (X-15), which is what stops deliberate death beating prestige. `[V]` **The stock `characters.totaltime`
+  cannot serve the time input**: `PlayerUpdates.cpp:117-119` accumulates it as `+= elapsed` with no activity
+  gate, so it is logged-in time including AFK. An active-time counter is module work (D29-d).
 - **Q9** — **Disconnect/server-fault deaths in staked lives** (D2-c): forgiven, appealed, or final?
 - **Q10** — **Planning-doc location**: keep `.claude/plans/` per your instruction and amend `AGENTS.md`, or
   switch to `.agents/plans/` per the repo's existing convention? Both are gitignored.

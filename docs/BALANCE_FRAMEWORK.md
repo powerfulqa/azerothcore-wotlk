@@ -116,6 +116,8 @@ one negative test** in `e2e/suites/` before the system that could cause it ships
 | X-12 | Draft manipulation by relog or session manipulation — **all three tools** of ADR-0027 | Offers generated once and persisted transactionally with the acquisition point (D8-a); reroll, hold and remove spend all recorded in the life row (D27-e) |
 | X-13 | A drafted proficiency whose gear never drops — a wasted slot, not an exploit but the same felt cost | Measure drop and quest-reward distribution by armour/weapon type and level band (V-3) before finalising the draft pool; keep the baseline set wide enough that no life is stranded (D20-c) |
 | X-14 | Loadout swapping to trivialise encounters — slotting tank tools for one fight, then swapping back | Replacement occurs **only at acquisition**; there is no free re-slotting (D23-a). Any future convenience that relaxes this reopens the exploit |
+| X-15 | Deliberate death being more profitable than prestiging | Both life-end paths use the **identical** payout formula (D29-c); the stake multiplies earnings *during* the life and the ending itself pays no bonus. Any future end-of-life bonus reopens this |
+| X-16 | Inflating the life-end payout by repetition or idling | Dungeon and raid credit is **per distinct instance per life**, never per run (D29-e); the time input is **active** time, not logged-in time (D29-d) |
 
 **X-3 and X-4 are now load-bearing, not merely architectural.** ADR-0024 left the augment layer uncapped,
 so the interaction surface grows combinatorially and these guards are the primary defence rather than a

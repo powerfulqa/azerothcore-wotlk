@@ -42,6 +42,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0026 | NG-8 narrowed: mechanics and balance values may be studied; expression may not be used | **Accepted** | 2026-09-05 |
 | 0027 | The draft carries three tools: reroll, hold and remove | **Accepted** | 2026-09-05 |
 | 0028 | Two layers, one currency, and every sink is agency | **Accepted** | 2026-09-05 |
+| 0029 | Currency is escrowed during a life and banked at life end, scaled by what the life achieved | **Accepted** | 2026-09-05 |
 
 ---
 
@@ -1439,6 +1440,71 @@ destructive — but any sink priced against a single-currency economy would need
 
 ---
 
+## ADR-0029 — Currency is escrowed during a life and banked at life end, scaled by what the life achieved
+
+**State:** Accepted (owner) · **Date:** 2026-09-05 · **Answers:** Q29 · **Clarifies:** ADR-0002's staked-end wording
+
+**Context.** ADR-0028 left open when currency reaches the account. Continuous crediting removes any pull to
+finish a life; crediting only at the end raises the question of what a life is worth. The owner's answer went
+further than the options offered: the payout should **scale with what the life accomplished**, so ending a
+life rewards the content the player actually engaged with.
+
+**Decision.**
+1. **Escrow.** Currency accrues during a life and is **credited to the account at life end**. It is
+   account-scoped and spendable across every vessel.
+2. **The payout scales by four inputs**: distinct dungeons and raids completed, achievements earned during
+   the life, level reached, and **active played time**.
+3. **The same formula applies to both life-end paths** — voluntary prestige and staked end alike.
+
+**Why this is better than the alternatives considered.**
+
+- **It reconciles ADR-0002 with escrow.** ADR-0002 insists "level 60 is a home, not a finish line", but
+  escrow alone turns 60 into a departure lounge — there is nothing to do but leave. Content-scaled payout
+  inverts that: a player *lives* at 60, runs content, grows the bank, and cashes out on their own terms.
+  Parking becomes escrow-building rather than dead time, which is what ADR-0002 wanted all along.
+- **It is the strongest Pillar 1 mechanism in the design.** Pillar 1's test is "does this make a player
+  engage with the world more deliberately?" This ties the entire persistent economy to that engagement.
+- **D29-a — X-9 now has two independent barriers.** `[V]` Prestige is a "deliberate, confirmed choice **at
+  60**" (`CORE_GAME_LOOP.md:131`), so banking requires completing a full 1→60 life; and the payout is scaled
+  by content, so a rushed life banks little. Neither barrier depends on the other.
+
+**Consequences.**
+
+- **⚠ D29-c — the shared formula is an exploit guard, not a convenience.** If the staked *end* paid any bonus
+  the ending itself did not earn, deliberate death would beat prestiging — level to 59 in a hardcore life,
+  then die to collect. Because both paths use the identical formula, the choice is mechanically neutral and
+  the stake differentiates them by multiplying earnings *during* the life. Registered as **X-15**. This also
+  resolves an ambiguity in `CORE_GAME_LOOP.md:132`, whose "grants additional persistent reward proportionate
+  to risk" reads, literally, as a death bonus.
+- `[V]` **⚠ D29-d — active played time needs building; the stock field is the wrong thing.**
+  `characters.totaltime` and `leveltime` exist (`data/sql/base/db_characters/characters.sql:51-52`) and are
+  maintained by `m_Played_time` — but `src/server/game/Entities/Player/PlayerUpdates.cpp:117-119` accumulates
+  them as `+= elapsed` **with no activity condition at all**, so they are pure wall-clock logged-in time
+  including AFK. That is precisely what this decision excludes. An **active-time counter is module work**, and
+  "active" needs defining (combat, movement, XP gain, quest or instance progress). `characters.totalKills`
+  exists as a possible cross-check. Until that exists, this input cannot ship.
+- **D29-e — dungeon and raid credit is per distinct instance, per life, not per run.** Otherwise re-running
+  one dungeon is a grind-to-inflate loop. This is life-scoped state — a set of completed instances on the
+  life record — and **D7-a's reset manifest must clear it**.
+- **D29-f — achievements now pay twice, deliberately.** ADR-0024 already grants augments from them, uncapped;
+  they now scale currency as well. Recorded as a choice rather than an oversight, with the risk stated: it
+  concentrates reward pressure on achievement hunting and may crowd out other play. **M-12** and **M-10**
+  should be read together to detect it.
+- **D29-g — P-11 becomes a hard UI requirement.** ADR-0002 requires "consequences shown before commitment".
+  A four-input formula is not something a player can compute, so the **ADR-0013 AddOn must preview the exact
+  payout** for ending the life now. Without that preview the decision is unmakeable and P-11 is breached.
+- `[O]` **D29-h — the weights and the combination function are undefined.** Four inputs need four weights and
+  a decision on whether they combine additively or multiplicatively; multiplicative would make a life with
+  zero of any input worth nothing, which is probably wrong. Tuning, but it blocks Phase 4.
+- **D29-i — composition with stake modifiers must be explicit.** Stakes multiply earnings *during* the life;
+  this formula scales the bank *at* the end. The order and interaction need stating in the Phase 4 spec, or
+  the two multipliers will be applied inconsistently.
+
+**Cost to reverse.** Medium. Escrow and the shared formula are cheap to change, but the per-life instance set
+and the active-time counter are schema and module work, and the weights will have been balanced against them.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -1457,7 +1523,6 @@ custom DBC.
 | Q4 | Module hosting: separate repo vs vendored in-tree | Phase 1 setup | Medium |
 | Q5 | Audience scale and realm openness | Anti-exploit budget, telemetry investment | Medium |
 | Q7 | Nerf policy for already-acquired powers | X-11 enforcement credibility | Medium |
-| **Q29** | When is currency credited — continuously, or at life end? (D28-d) | Phase 2 schema; X-9 reset abuse; D2-b auditability | **High** |
 | Q28 | Retention once every sink is maxed — the economy's terminal state (D28-c) | Phase 7 | Medium |
 | Q9 | Disconnect / server-fault deaths in staked lives | Player trust; D2-c | Medium |
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |

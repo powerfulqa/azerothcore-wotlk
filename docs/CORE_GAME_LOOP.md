@@ -106,6 +106,11 @@ Levelling 1→60 through the classic world. Three power layers accumulate, and t
 | **Talents** | passive modifiers, specialisation | through levelling, by guaranteed-offer draft (D-008) |
 | **Augments** | build-warping interactions — resource, cooldown, trigger, area, scaling transformation, defensive conversion, risk/reward | level milestones, and potentially defined PvE achievements |
 
+**Banking (D-029).** Currency accrues during a life and is credited to the account **only at life end**,
+scaled by what the life achieved — distinct dungeons and raids completed, achievements earned, level reached,
+and *active* played time. So level 60 is genuinely a home: you live there, run content, grow the bank, and
+cash out when you choose. Both life-end paths use the same formula.
+
 **Draft tools (D-027).** A life carries three counted, account-earned tools: **reroll** replaces the whole
 offer, **hold** carries one option into the next offer, **remove** takes an option out of this life's
 eligible pool for good. Remove is a player-authored eligibility rule, so it improves every later offer
@@ -129,7 +134,7 @@ Two paths, per D-002:
 | Path | Trigger | Notes |
 |---|---|---|
 | **Prestige (default)** | Player's deliberate, confirmed choice at 60 | Consequences shown before commitment (P-11). Death during a default life is ordinary WoW death with no life consequence. |
-| **Staked end** | Declared stake condition met — e.g. death in a hardcore life | Grants additional persistent reward proportionate to risk. Must be fully auditable: cause, location, source, timestamp (D2-b). |
+| **Staked end** | Declared stake condition met — e.g. death in a hardcore life | The stake multiplied earnings *throughout* the life; the ending itself pays **no** bonus, and uses the **same** payout formula as prestige (D-029, X-15). Must be fully auditable: cause, location, source, timestamp (D2-b). |
 
 **Constraint D2-a:** no persistent unlock may be reachable *only* through a staked life. If it is, "optional"
 is a false description and the model collapses into mandatory hardcore.
