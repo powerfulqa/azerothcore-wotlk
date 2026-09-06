@@ -1,7 +1,7 @@
 # Core Game Loop
 
 **Status:** Proposed — awaiting owner approval.
-**Last updated:** 2026-09-03
+**Last updated:** 2026-09-06
 **Governed by:** D-001r (persistent-progression roguelite with per-life classless builds) and
 D-002 (voluntary prestige, plus opt-in stakes). See `DECISION_LOG.md`.
 
@@ -156,8 +156,16 @@ stake modifiers, timestamps, outcome and audit trail. Consequences that land in 
 - The prestige reset itself is the project's highest-risk operation (D7-a) and needs an enumerated
   table-by-table reset manifest before implementation. That is a `QA_STRATEGY.md` gate, not a loop concern.
 
+**Settled by D-033 (2026-09-06).** A recorded life ending is **authoritative over any database restore** —
+a death that was recorded is never undone. The realm's recovery promise is a single number, *at most fifteen
+minutes*, inherited from `PlayerSaveInterval` (D33-a). The asymmetry has to be stated to players before an
+incident makes them discover it: a rollback **keeps the loss and drops the gain**, so a character may come
+back still dead while loot earned just before the death is gone (D33-d). That is deliberate, and it is a
+P-11 obligation.
+
 Still open in this section: `[O]` Q9 — whether disconnect and server-fault deaths are forgiven, appealed, or final in a
-staked life. Silence here is a player-trust failure.
+staked life. Silence here is a player-trust failure, and D33-h now constrains the answer: having decided the
+realm's record beats the operator's convenience on rollbacks, Q9 cannot land the other way on faults.
 
 ---
 

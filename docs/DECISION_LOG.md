@@ -1,7 +1,7 @@
 # Decision Log
 
 **Status:** Living document.
-**Last updated:** 2026-09-04
+**Last updated:** 2026-09-06
 **Purpose:** Architecture Decision Records for decisions that are costly to reverse. A decision that is not
 here was not made — it was assumed, and assumptions get challenged.
 
@@ -46,6 +46,7 @@ here was not made — it was assumed, and assumptions get challenged.
 | 0030 | Difficulty is a selectable modifier layer over the world, unlocked by content, switchable at rest | **Accepted** | 2026-09-05 |
 | 0031 | One indexed combat hook, and only trigger-bearing augments are capped | **Accepted** | 2026-09-05 |
 | 0032 | A group plays at the lowest difficulty tier present | **Accepted** | 2026-09-05 |
+| 0033 | A fifteen-minute recovery window, and a death once recorded is never undone | **Accepted** | 2026-09-06 |
 
 ---
 
@@ -1698,6 +1699,92 @@ split-reward model or to per-player tiers would not touch schema.
 
 ---
 
+## ADR-0033 — A fifteen-minute recovery window, and a death once recorded is never undone
+
+**State:** Accepted (owner) · **Date:** 2026-09-06 · **Answers:** Q24 · **Closes:** D18-e
+
+**Context.** ADR-0018 settled the *shape* of backups — encrypted logical dumps of `acore_auth` and
+`acore_characters` with the restore asserted in the same job — and deliberately left the frequency open,
+because D18-e turned it into a design question: ADR-0002's **D2-b** requires staked life endings to be fully
+auditable, so a restore that rewinds far enough can resurrect a character the realm recorded as dead, or
+erase the evidence of a legitimate death. The frequency had to follow from what a hardcore player would
+accept losing.
+
+**What was verified.**
+- `[V]` **The backup cadence is not the only window, and was not the largest one.** The worldserver holds
+  live character state in memory and flushes it on a timer: `PlayerSaveInterval` defaults to **900000 ms —
+  15 minutes** (`src/server/game/World/WorldConfig.cpp:168`).
+- `[V]` **The early-save escape hatch is off by default.** `PlayerSave.AdditionalSaves`, the bitmask that
+  forces a save shortly after rare loot, a quest change or an achievement, defaults to **0**
+  (`src/server/game/World/WorldConfig.cpp:171`, driving `Player::UpdateAdditionalSaves`,
+  `src/server/game/Entities/Player/PlayerUpdates.cpp:2412`).
+- `[V]` A worldserver crash therefore already costs up to 15 minutes of progress *with a perfect backup*.
+  Buying a backup window tighter than that spends effort on the wrong risk.
+- `[V]` ADR-0007 already gives the audit record a home — the `character_life` row — so the *ending* of a life
+  can be written at the moment it happens rather than waiting for the periodic save.
+
+**Decision.**
+1. **Dumps every 15 minutes**, aligned to `PlayerSaveInterval`, keeping ADR-0018's shape unchanged.
+2. **The life-end record is authoritative over the snapshot.** A death that was recorded is never undone by
+   a restore.
+
+The player promise is therefore a single number: *you can lose at most fifteen minutes* — and *a death
+stands*.
+
+**Why this over the alternatives.** Point-in-time recovery (nightly dump plus continuously shipped binary
+logs) is the only option that meaningfully beats fifteen minutes, but the restore procedure it demands is
+materially harder to *test*, and **D18-b makes the tested restore the deliverable, not the dump** — an
+untested recovery path is the one thing that decision forbids. Nightly dumps alone were cheaper but would
+have put the backup window an order of magnitude beyond the crash window behind it, for no gain in
+simplicity that matters. Letting the restore simply be the truth — no ledger guarantee — was rejected
+because it makes a hardcore death revocable by an operational accident, which is exactly the outcome D2-b
+exists to prevent.
+
+**Consequences.**
+
+- **D33-a — the fifteen-minute figure is inherited, not chosen, and the two dials must move together.**
+  `[V]` It equals `PlayerSaveInterval`. If that value is ever changed, the backup cadence has to follow it or
+  the single-number promise silently becomes false. This belongs in the backup job's own documentation, not
+  in folklore.
+- **⚠ D33-b — "authoritative" is a slogan unless the ledger survives the restore that contradicts it.** If
+  the `character_life` row lives only in `acore_characters`, restoring a fifteen-minute-old dump restores the
+  ledger too, and the guarantee is empty in precisely the case it was written for. **The life-end event must
+  therefore also be written to an append-only record that is not rolled back with the database** — shipped
+  off-host on the same job, at minimum. This is the load-bearing half of the decision and the half that is
+  easy to skip.
+- **D33-c — the life-end write must be immediate and outside the periodic save path.** Deferring it to the
+  next `PlayerSaveInterval` tick would reintroduce a fifteen-minute hole in the audit trail itself. Like
+  D31-c, this is a first-migration property of the `character_life` schema and its write path, not an
+  optimisation to add later.
+- **D33-d — the asymmetry is deliberate and must be told to players.** A rollback keeps the loss and drops
+  the gain: a player may find their character still dead while the loot earned just before the death is gone.
+  That is the hardcore-favouring direction on purpose, and it is a **P-11** obligation to state it before
+  someone discovers it during an incident.
+- `[O]` **D33-e — the crash window is not actually fifteen minutes for everything, and closing that gap is a
+  separate trade.** With `PlayerSave.AdditionalSaves = 0`, a crash can drop a rare drop or a completed quest
+  that the promise implies is safe. Enabling it (value **7**) or lowering `PlayerSaveInterval` would tighten
+  the real window at the cost of database write load. Registered as **Q31**; it is a performance decision,
+  not a backup one, and it is the difference between the promise being true and being approximately true.
+- **D33-f — retention becomes a real operational parameter.** Ninety-six dumps a day is not a rounding error
+  over months. `[V]` `acore_characters` ships at **444 KB** (ADR-0018), so the near-term cost is negligible,
+  but a retention scheme — recent dumps kept densely, older ones thinned — is now required rather than
+  optional. It stays an operational parameter per ADR-0018 and does not need an ADR.
+- **D33-g — population growth is the trigger to revisit point-in-time recovery.** A full logical dump every
+  fifteen minutes is free at 444 KB and is not free at two orders of magnitude more. The revisit condition is
+  the dump duration approaching the interval, not a date.
+- **D33-h — this constrains Q9 rather than merely touching it.** A server fault that forces a rollback and a
+  server fault that kills a character are the same class of event. Having just decided that the realm's
+  record beats the operator's convenience, Q9's answer for disconnect and server-fault deaths must be
+  consistent with that, or the two policies will contradict each other in the same support ticket.
+- **D33-i — D15-b's gate is unchanged.** Per D18-c nothing here can be exercised until a host and a database
+  exist. The first persistent table still waits on a restore that has actually run.
+
+**Cost to reverse.** Low for the cadence — it is a schedule. Medium for the ledger guarantee, because D33-b
+and D33-c are properties of the `character_life` write path that are cheap to build in and expensive to
+retrofit.
+
+---
+
 ## Pending decisions
 
 Open questions, in the order they will be asked. Each becomes an ADR when answered.
@@ -1711,13 +1798,13 @@ custom DBC.
 
 | Q | Decision | Blocks | Cost to reverse |
 |---|---|---|---|
-| Q24 | Acceptable data-loss window, given D2-b requires staked deaths be auditable (D18-e) | Backup frequency; hardcore dispute handling | Medium |
 | Q4 | Module hosting: separate repo vs vendored in-tree | Phase 1 setup | Medium |
 | Q5 | Audience scale and realm openness | Anti-exploit budget, telemetry investment | Medium |
 | Q7 | Nerf policy for already-acquired powers | X-11 enforcement credibility | Medium |
 | Q28 | Retention once every sink is maxed — the economy's terminal state (D28-c) | Phase 7 | Medium |
-| Q9 | Disconnect / server-fault deaths in staked lives | Player trust; D2-c | Medium |
+| Q9 | Disconnect / server-fault deaths in staked lives — now constrained by D33-h | Player trust; D2-c | Medium |
 | Q12 | Vessel deletion vs life records backing account unlocks (D7-c) | Phase 2 schema, data integrity | Medium |
+| Q31 | Whether to enable `PlayerSave.AdditionalSaves` and/or lower `PlayerSaveInterval` (D33-e) | Whether ADR-0033's promise is true or approximate | Low |
 | Q10 | Planning-doc location vs `AGENTS.md` | Process only | Low |
 
-**Next:** Q24 (data-loss window), then the gear affix layer, then Q5 (now coupled to H-11), then Q28.
+**Next:** the gear affix layer, then Q5 (now coupled to H-11), then Q28.

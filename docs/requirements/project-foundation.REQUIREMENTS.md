@@ -538,10 +538,16 @@ Ordered by how much each constrains everything downstream.
   only, scheduled and stored off-host, with the restore asserted automatically in the same job.
   `acore_world` is excluded because `ac-db-import` rebuilds it from `data/sql/` — which makes T-5
   load-bearing (D18-a). Per D18-c this is designed but not yet exercisable, so D15-b's gate stands.
-- **Q24** — **Acceptable data-loss window** (D18-e). D2-b requires staked life endings to be fully
-  auditable, so a restore that rewinds hours could resurrect a character the realm recorded as dead, or
-  destroy the evidence of a legitimate one. Backup frequency must follow from what a hardcore player would
-  accept losing, not from convenience.
+- **Q24 — ANSWERED 2026-09-06 → ADR-0033.** Dumps every **15 minutes**, and a recorded life ending is
+  **authoritative over the snapshot** — a death is never undone by a restore. `[V]` The figure is inherited
+  rather than chosen: `PlayerSaveInterval` defaults to 900000 ms (`WorldConfig.cpp:168`), so a crash already
+  costs up to 15 minutes with a perfect backup, and a tighter backup window would buy nothing (D33-a).
+  Point-in-time recovery was rejected because D18-b makes the *tested* restore the deliverable and PITR is
+  materially harder to test. Load-bearing costs: **⚠ D33-b** the life-end record must also be written to an
+  append-only store that is not rolled back with the database, or "authoritative" is empty; **D33-c** that
+  write must be immediate, not deferred to the periodic save. Registers **Q31** (`PlayerSave.AdditionalSaves`
+  defaults to 0, `WorldConfig.cpp:171`, so the real crash window is wider than the promise) and constrains
+  **Q9** (D33-h). Closes D18-e; D15-b's gate is unchanged.
 - **Q25 — ANSWERED 2026-09-05 → ADR-0020.** Baseline proficiencies (cloth, leather, a few weapon types) are
   granted at life start, satisfying P-2 structurally; plate, mail, shields, two-handers and ranged are
   **draftable**. `[V]` Granting one is just teaching a spell — `SPELL_EFFECT_SKILL` (118) for the equip gate
@@ -562,6 +568,11 @@ Ordered by how much each constrains everything downstream.
   `[V]` Open-world difficulty runs on player auras (`SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN` and kin), costing
   no script dispatch — so **D30-b largely dissolves**. The cap is *computed* from a measured per-trigger cost
   and a chosen per-event budget (D31-f), not guessed.
+- **Q31** — **Whether to close the gap between the promised recovery window and the real crash window**
+  (D33-e). `[V]` `PlayerSave.AdditionalSaves` defaults to **0** (`WorldConfig.cpp:171`), so a crash can drop
+  a rare drop, a quest completion or an achievement that ADR-0033's fifteen-minute promise implies is safe.
+  Enabling it (value 7) or lowering `PlayerSaveInterval` tightens the real window at the cost of database
+  write load. A performance decision, not a backup one.
 
 ---
 
@@ -573,5 +584,5 @@ Ordered by how much each constrains everything downstream.
 4. **§9** — anti-exploit register complete, or is something missing?
 5. **§10** — approve the documentation set?
 6. **§11** — approve the phase order, especially the spike-first placement of Phase 1?
-7. **Q1–Q22** — answered since this document was written; see `../DECISION_LOG.md` for ADR-0007
-   onward. **Q23** is next.
+7. **Q1–Q30** — answered since this document was written; see `../DECISION_LOG.md` for ADR-0007
+   onward. The **gear affix layer** is next.

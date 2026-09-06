@@ -80,14 +80,14 @@ remain *Proposed*):
 | **0030** | Difficulty is a **selectable modifier layer over the world** — unlocked by content, switchable at rest (amends ADR-0002) |
 | **0031** | **One indexed combat hook**; only *trigger-bearing* augments are capped, and difficulty runs on player auras (narrows ADR-0024) |
 | **0032** | A group plays at the **lowest difficulty tier present** — danger and reward stay aligned (answers Q30) |
+| **0033** | **Fifteen-minute recovery window**, aligned to `PlayerSaveInterval`; a recorded death is never undone by a restore (answers Q24) |
 
 Those answers raised ten further questions (Q11–Q20), one of which (Q18) was dissolved
 rather than answered. Fourteen remain open and are deliberately unanswered rather than
 guessed at.
 
-**Next action:** **Q24** — the acceptable data-loss window, which D2-b's auditable staked
-deaths turn into a design question rather than an ops one. Then the gear affix layer, then
-**Q5** (now coupled to H-11's tier-fragmentation risk), then **Q28**.
+**Next action:** the **gear affix layer**, then **Q5** (now coupled to H-11's
+tier-fragmentation risk), then **Q28**.
 
 ## Conventions in these documents
 

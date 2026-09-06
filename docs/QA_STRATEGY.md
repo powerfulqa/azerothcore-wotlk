@@ -1,7 +1,7 @@
 # QA Strategy
 
 **Status:** Proposed — awaiting owner approval.
-**Last updated:** 2026-09-03
+**Last updated:** 2026-09-06
 **Principle:** "It compiles" is not evidence. Neither is "it should work."
 
 ---
@@ -64,8 +64,17 @@ volume, `ac-database`, which `docker compose down -v` destroys. T-6 gives persis
 valve and D7-a gives the prestige reset no undo, so there is no recovery path other than a backup. A
 **tested restore** — not merely a configured backup — is a prerequisite to creating the first persistent
 table. **ADR-0018 settles the policy** (encrypted logical dumps of `acore_auth` and `acore_characters`, with
-the restore asserted automatically in the same job). Per D18-c the gate still stands: the policy is designed
-but cannot yet be exercised, and only a restore that has actually run satisfies this.
+the restore asserted automatically in the same job) and **ADR-0033 settles the cadence** — every 15 minutes,
+aligned to `PlayerSaveInterval`. Per D18-c the gate still stands: the policy is designed but cannot yet be
+exercised, and only a restore that has actually run satisfies this.
+
+**`[O]` ADR-0033 adds two testable properties to the life-end write path.** **D33-c** requires the
+`character_life` ending to be written *immediately*, not at the next `PlayerSaveInterval` tick — which is
+assertable in e2e: kill a staked character, read the row before any periodic save could have run. **⚠ D33-b**
+requires the same ending to reach an append-only record that a database restore does not roll back, and that
+is only meaningfully tested by the restore job itself: restore a dump taken *before* a recorded death and
+assert the death still stands. Until that assertion exists, "a death is never undone" is a claim, not a
+verified property.
 
 **`[O]` The AddOn is a new test layer this document does not yet cover.** ADR-0013 (D13-c) adds a Lua
 codebase with its own release cycle, version-locked to the server. A stale AddOn misreporting resources is
